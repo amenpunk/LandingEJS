@@ -3,6 +3,10 @@ const app = expres()
 const PORT = process.env.PORT || 8080;
 const dotenv = require('dotenv');
 dotenv.config();
+const session = require('express-session');
+app.use(session({secret: process.env.SESSION}));
+let sess
+
 
 app.use(expres.urlencoded({ extended: true }))
 app.set('view engine', 'ejs')
@@ -21,25 +25,42 @@ const db_config = {
     encripted : true
 }
  
-
-
 app.get('/', async (req, res) => {
-    console.log( process.env.MSSQL_PASS)
-    let pool = await sql.connect(db_config)
-    let result1 = await pool.request()
-        .input('input_parameter', sql.Int, 1)
-        .query('select * from login where id_user = @input_parameter')
-    console.log(result1)
-
     return res.render("index")
 })
 
-app.post('/login', (req, res) => {
-    console.log(req.body)
-    return res.render('login')
+app.post('/login', async (req, res) => {
+    
+    const { mail, password } = req.body
+    sess=req.session;
+
+    
+    let pool = await sql.connect(db_config)
+    let query = await pool.request()
+        .input('input_parameter', sql.TYPES.VarChar, mail)
+        .query('select * from login where email = @input_parameter')
+
+    const {recordset} = query
+    if(recordset.length <= 0){
+        return res.render('index')
+    }
+    const {pass,nombre} = recordset.shift()
+    const loged = pass === Buffer.from(password).toString('base64')
+
+    if(!loged){
+        return res.render('index')
+    }
+    sess.loged = true;
+    sess.name = nombre;
+    return res.status(200).render('home', {
+        name : nombre 
+    })
 })
 
-app.post('/home', (req, res) => {
-    console.log(req.body)
-    return res.render('home')
+app.get('/home', (req, res) => {
+    sess = req.session;
+    if(!sess.loged){
+        return res.render('index')
+    }
+    return res.render('home', { name : sess.name })
 })
