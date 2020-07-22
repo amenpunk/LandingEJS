@@ -3,6 +3,7 @@ const app = expres()
 const PORT = process.env.PORT || 8080;
 const dotenv = require('dotenv');
 dotenv.config();
+const sql = require('mssql')
 const session = require('express-session');
 app.use(session({secret: process.env.SESSION}));
 let sess
@@ -15,7 +16,6 @@ app.listen(PORT, () => {
     console.log(`APP listen in port ${PORT}`)
 })
 
-const sql = require('mssql')
 
 const db_config = {
     user: "mingsql",
@@ -24,23 +24,27 @@ const db_config = {
     database: "landing",
     encripted : true
 }
+
  
 app.get('/', async (req, res) => {
     return res.render("index")
 })
 
 app.post('/login', async (req, res) => {
-    
+
     const { mail, password } = req.body
     sess=req.session;
 
+    const result = await sql.connect(db_config).then( pool => {
+        return pool.request()
+            .input('input_parameter', sql.TYPES.VarChar, mail)
+            .query('select * from login where email = @input_parameter')
+    }).catch(e => {
+        console.log(e)
+        return false
+    })
     
-    let pool = await sql.connect(db_config)
-    let query = await pool.request()
-        .input('input_parameter', sql.TYPES.VarChar, mail)
-        .query('select * from login where email = @input_parameter')
-
-    const {recordset} = query
+    const {recordset} = result
     if(recordset.length <= 0){
         return res.render('index')
     }
@@ -55,6 +59,30 @@ app.post('/login', async (req, res) => {
     return res.status(200).render('home', {
         name : nombre 
     })
+})
+
+app.get('/register', (req, res) => {
+    return res.render('register')
+})
+
+app.post('/save', async (req, res) => {
+    
+    const { mail, password, nombre } = req.body
+    console.log(req.body)
+    const pass = Buffer.from(password).toString('base64')
+
+    const result = await sql.connect(db_config).then( pool => {
+           return pool.request()
+            .input('mail', sql.TYPES.VarChar, mail)
+            .input('pass', sql.TYPES.VarChar, pass)
+            .input('nombre', sql.TYPES.VarChar, nombre)
+            .query('insert into login(nombre, email, pass) values(@nombre, @mail, @pass)')
+        }).catch(e => {
+            console.log(e)
+            return false
+        })
+
+    return res.render('login')
 })
 
 app.get('/home', (req, res) => {
