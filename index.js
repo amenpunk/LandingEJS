@@ -16,7 +16,6 @@ app.listen(PORT, () => {
     console.log(`APP listen in port ${PORT}`)
 })
 
-
 const db_config = {
     user: "mingsql",
     password: process.env.MSSQL_PASS,
@@ -24,9 +23,13 @@ const db_config = {
     database: "landing",
     encripted : true
 }
-
  
 app.get('/', async (req, res) => {
+    sess = req.session;
+    console.log(sess)
+    if(sess.loged){
+        return res.render('home', {name : sess.name})
+    }
     return res.render("index")
 })
 
@@ -83,6 +86,15 @@ app.post('/save', async (req, res) => {
         })
 
     return res.render('login')
+})
+
+app.get('/logout', (req,res) => {
+    req.session.destroy((err) => {
+        if(err) {
+            return console.log(err);
+        }
+        res.redirect('/');
+    });
 })
 
 app.get('/home', (req, res) => {
