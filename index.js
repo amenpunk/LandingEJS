@@ -85,7 +85,7 @@ app.post('/save', async (req, res) => {
             return false
         })
 
-    return res.render('login')
+    return res.render('home')
 })
 
 app.get('/logout', (req,res) => {
