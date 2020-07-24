@@ -8,9 +8,10 @@ const session = require('express-session');
 app.use(session({secret: process.env.SESSION}));
 let sess
 
-
 app.use(expres.urlencoded({ extended: true }))
 app.set('view engine', 'ejs')
+app.use(expres.static('public'));
+
 
 app.listen(PORT, () => {
     console.log(`APP listen in port ${PORT}`)
@@ -24,13 +25,24 @@ const db_config = {
     encripted : true
 }
  
-app.get('/', async (req, res) => {
+app.get('/', (req, res) => {
     sess = req.session;
-    console.log(sess)
+    
     if(sess.loged){
-        return res.render('home', {name : sess.name})
+        return res.render('home', {name : sess.nombre})
     }
-    return res.render("index")
+    
+    return res.render('landingpage', { error : false})
+})
+
+app.get('/loginForm', async (req, res) => {
+    sess = req.session;
+    const register = req.query.name ? true : false
+    
+    if(sess.loged){
+        return res.render('home', {name : sess.name, nuevo : register})
+    }
+    return res.render("loginForm", {nuevo : register})
 })
 
 app.post('/login', async (req, res) => {
@@ -49,7 +61,7 @@ app.post('/login', async (req, res) => {
     
     const {recordset} = result
     if(recordset.length <= 0){
-        return res.render('index')
+        return res.render('landingpage', {error : true})
     }
     const {pass,nombre} = recordset.shift()
     const loged = pass === Buffer.from(password).toString('base64')
@@ -58,20 +70,31 @@ app.post('/login', async (req, res) => {
         return res.render('index')
     }
     sess.loged = true;
-    sess.name = nombre;
+    sess.nombre = nombre;
     return res.status(200).render('home', {
         name : nombre 
     })
 })
 
 app.get('/register', (req, res) => {
+    sess = req.session;
     return res.render('register')
+})
+
+
+app.get('/home', (req, res)=> {
+    sess = req.session;
+    console.log(sess.nombre)
+    return res.render('home', { name : sess.nombre })
 })
 
 app.post('/save', async (req, res) => {
     
+    sess=req.session;
     const { mail, password, nombre } = req.body
-    console.log(req.body)
+    sess.nombre = nombre
+    sess.loged = true;
+
     const pass = Buffer.from(password).toString('base64')
 
     const result = await sql.connect(db_config).then( pool => {
@@ -85,7 +108,7 @@ app.post('/save', async (req, res) => {
             return false
         })
 
-    return res.render('home')
+    return res.render('home', {name :nombre})
 })
 
 app.get('/logout', (req,res) => {
@@ -97,10 +120,3 @@ app.get('/logout', (req,res) => {
     });
 })
 
-app.get('/home', (req, res) => {
-    sess = req.session;
-    if(!sess.loged){
-        return res.render('index')
-    }
-    return res.render('home', { name : sess.name })
-})

@@ -12,18 +12,33 @@
         <header>
             <div class="container">
                 <div class="textos">
-                    <center>
-                        <h1 class="treinta">Bienvenido <%= name %> :)</h1>
-                    </center>
-                    <center>
-                    </center>
-                    <center>
-                        <form action="/logout", method='get'>
-                            <input type="submit" value="Salir" />
-                        </form>
-                    </center>
+    <center>
+        <h1 class="treinta">Bienvenido</h1>
+    </center>
+
+    <center>
+        <h2 class="veinte"> Ingresa tu email y password</h2>
+    </center>
+
+    <center class="container">
+       
+        <% if (nuevo) { %>
+        <form method="POST" action="/save">
+       <% } else { %>
+        <form method="POST" action="/login">
+       <% } %> 
+     
+
+            <input type="email" name="mail" placeholder="Email" />
+            <input type="password" name="password" placeholder="Password" />
+            <% if (nuevo) { %>
+            <input type="text" name="nombre" placeholder="Name" />
+            <% } %>
+            <input type="submit" value="Ingresar" />
+        </form>
+    </center>
+
                 </div>
-                <img src="https://media1.tenor.com/images/03fb298c0fcdc275bcfbc5a8cb5d4b3f/tenor.gif?itemid=10431835" alt=""/>
             </div>
         </header>
         <div class="wave">
