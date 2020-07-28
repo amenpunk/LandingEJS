@@ -18,10 +18,10 @@ app.listen(PORT, () => {
 })
 
 const db_config = {
-    user: "mingsql",
+    user: process.env.MSSQL_USER,
     password: process.env.MSSQL_PASS,
-    server: "mingsql.database.windows.net",
-    database: "landing",
+    server: process.env.MSSQL_SERVER,
+    database: process.env.MSSQ_DATABASE,
     encripted : true
 }
  
@@ -83,7 +83,11 @@ app.get('/register', (req, res) => {
 
 
 app.get('/home', (req, res)=> {
+
     sess = req.session;
+    if(!sess.loged){
+        return res.render('landingpage', {error : false})
+    }
     console.log(sess.nombre)
     return res.render('home', { name : sess.nombre })
 })
