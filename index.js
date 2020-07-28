@@ -7,11 +7,9 @@ const sql = require('mssql')
 const session = require('express-session');
 const { config } = require("./config")
 const cors = require('cors')
-
 app.use(cors())
 app.use(session(config.session));
 
-let sess
 
 app.use(expres.urlencoded({ extended: true }))
 app.set('view engine', 'ejs')
@@ -23,17 +21,17 @@ app.listen(PORT, () =>  console.log('APP listen in port', PORT) )
 app.get('/', (req, res) => {
 
     sess = req.session;
-    
     if(sess.loged){
         return res.render('home', {name : sess.nombre})
     }
-    
+
     return res.render('landingpage', { error : false})
 })
 
 app.get('/login', async (req, res) => {
     
     sess = req.session;
+    console.log(sess)
     const register = req.query.name ? true : false
     
     if(sess.loged){
@@ -46,6 +44,7 @@ app.post('/login', async (req, res) => {
 
     const { mail, password } = req.body
     sess=req.session;
+    console.log(sess)
 
     const result = await sql.connect(config.db).then( pool => {
         return pool.request()
@@ -68,28 +67,21 @@ app.post('/login', async (req, res) => {
     }
     sess.loged = true;
     sess.nombre = nombre;
-    return res.render('home', {
-        name : nombre 
-    })
+    return res.redirect('home')
 })
 
 app.get('/home', (req, res)=> {
-
     sess = req.session;
-    console.log(sess)
     if(!sess.loged){
         return res.render('landingpage', {error : false})
     }
-    console.log(sess.nombre)
     return res.render('home', { name : sess.nombre })
 })
 
 app.post('/save', async (req, res) => {
     
     sess=req.session;
-    const { mail, password, nombre } = req.body
-    sess.nombre = nombre
-    sess.loged = true;
+    const { mail, password, nombre, phone } = req.body
 
     const pass = Buffer.from(password).toString('base64')
 
@@ -98,12 +90,16 @@ app.post('/save', async (req, res) => {
             .input('mail', sql.TYPES.VarChar, mail)
             .input('pass', sql.TYPES.VarChar, pass)
             .input('nombre', sql.TYPES.VarChar, nombre)
-            .query('insert into login(nombre, email, pass) values(@nombre, @mail, @pass)')
+            .input('phone', sql.TYPES.VarChar, phone)
+            .query('insert into login(nombre, email, pass, phone) values(@nombre, @mail, @pass, @phone)')
         }).catch(e => {
             console.log(e)
             return false
         })
-    return res.render('home', {name :nombre})
+    
+    sess.nombre = nombre
+    sess.loged = true;
+    return res.redirect('home');
 })
 
 app.post('/logout', (req,res) => {

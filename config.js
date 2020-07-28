@@ -1,4 +1,5 @@
-const MaxTime = 6000;
+const MaxTime = 60000
+//const twilio = require('twilio')(process.env.TWILIO_ACCOUNT, process.env.TWILIO_TOKEN);
 
 module.exports.config = {
 
@@ -15,6 +16,5 @@ module.exports.config = {
         server: process.env.MSSQL_SERVER,
         database: process.env.MSSQ_DATABASE,
         encripted : true
-    }
-
+    },
 }
