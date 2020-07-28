@@ -5,7 +5,12 @@ const dotenv = require('dotenv');
 dotenv.config();
 const sql = require('mssql')
 const session = require('express-session');
-app.use(session({secret: process.env.SESSION}));
+const { config } = require("./config")
+const cors = require('cors')
+
+app.use(cors())
+app.use(session(config.session));
+
 let sess
 
 app.use(expres.urlencoded({ extended: true }))
@@ -13,19 +18,10 @@ app.set('view engine', 'ejs')
 app.use(expres.static('public'));
 
 
-app.listen(PORT, () => {
-    console.log(`APP listen in port ${PORT}`)
-})
-
-const db_config = {
-    user: process.env.MSSQL_USER,
-    password: process.env.MSSQL_PASS,
-    server: process.env.MSSQL_SERVER,
-    database: process.env.MSSQ_DATABASE,
-    encripted : true
-}
+app.listen(PORT, () =>  console.log('APP listen in port', PORT) )
  
 app.get('/', (req, res) => {
+
     sess = req.session;
     
     if(sess.loged){
@@ -35,7 +31,8 @@ app.get('/', (req, res) => {
     return res.render('landingpage', { error : false})
 })
 
-app.get('/loginForm', async (req, res) => {
+app.get('/login', async (req, res) => {
+    
     sess = req.session;
     const register = req.query.name ? true : false
     
@@ -50,7 +47,7 @@ app.post('/login', async (req, res) => {
     const { mail, password } = req.body
     sess=req.session;
 
-    const result = await sql.connect(db_config).then( pool => {
+    const result = await sql.connect(config.db).then( pool => {
         return pool.request()
             .input('input_parameter', sql.TYPES.VarChar, mail)
             .query('select * from login where email = @input_parameter')
@@ -64,27 +61,22 @@ app.post('/login', async (req, res) => {
         return res.render('landingpage', {error : true})
     }
     const {pass,nombre} = recordset.shift()
-    const loged = pass === Buffer.from(password).toString('base64')
+    const correctLogin = pass === Buffer.from(password).toString('base64')
 
-    if(!loged){
-        return res.render('index')
+    if(!correctLogin){
+        return res.render('landingpage', {error : true})
     }
     sess.loged = true;
     sess.nombre = nombre;
-    return res.status(200).render('home', {
+    return res.render('home', {
         name : nombre 
     })
 })
 
-app.get('/register', (req, res) => {
-    sess = req.session;
-    return res.render('register')
-})
-
-
 app.get('/home', (req, res)=> {
 
     sess = req.session;
+    console.log(sess)
     if(!sess.loged){
         return res.render('landingpage', {error : false})
     }
@@ -101,7 +93,7 @@ app.post('/save', async (req, res) => {
 
     const pass = Buffer.from(password).toString('base64')
 
-    const result = await sql.connect(db_config).then( pool => {
+    const result = await sql.connect(config.db).then( pool => {
            return pool.request()
             .input('mail', sql.TYPES.VarChar, mail)
             .input('pass', sql.TYPES.VarChar, pass)
@@ -111,11 +103,10 @@ app.post('/save', async (req, res) => {
             console.log(e)
             return false
         })
-
     return res.render('home', {name :nombre})
 })
 
-app.get('/logout', (req,res) => {
+app.post('/logout', (req,res) => {
     req.session.destroy((err) => {
         if(err) {
             return console.log(err);
@@ -123,4 +114,8 @@ app.get('/logout', (req,res) => {
         res.redirect('/');
     });
 })
+
+app.use(function(req,res){
+    res.status(404).send('<div><center> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>');
+});
 

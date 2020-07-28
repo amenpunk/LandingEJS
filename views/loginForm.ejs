@@ -12,31 +12,29 @@
         <header>
             <div class="container">
                 <div class="textos">
-    <center>
-        <h1 class="treinta">Bienvenido</h1>
-    </center>
+                    <center>
+                        <h1 class="treinta">Bienvenido</h1>
+                    </center>
 
-    <center>
-        <h2 class="veinte"> Ingresa tu email y password</h2>
-    </center>
+                    <center>
+                        <h2 class="veinte"> Ingresa tu email y password</h2>
+                    </center>
 
-    <center class="container">
-       
-        <% if (nuevo) { %>
-        <form method="POST" action="/save">
-       <% } else { %>
-        <form method="POST" action="/login">
-       <% } %> 
-     
+                    <center class="container">
 
-            <input type="email" name="mail" placeholder="Email" />
-            <input type="password" name="password" placeholder="Password" />
-            <% if (nuevo) { %>
-            <input type="text" name="nombre" placeholder="Name" />
-            <% } %>
-            <input type="submit" value="Ingresar" />
-        </form>
-    </center>
+                        <% if (nuevo) { %>
+                        <form method="POST" action="/save">
+                            <% } else { %>
+                            <form method="POST" action="/login">
+                                <% } %> 
+                                <input type="email" name="mail" placeholder="Email" />
+                                <input type="password" name="password" placeholder="Password" />
+                                <% if (nuevo) { %>
+                                <input type="text" name="nombre" placeholder="Name" />
+                                <% } %>
+                                <input type="submit" value="Ingresar" />
+                            </form>
+                    </center>
 
                 </div>
             </div>
