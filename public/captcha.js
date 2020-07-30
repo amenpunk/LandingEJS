@@ -17,21 +17,23 @@ function onSubmit(token) {
     var mail = document.getElementById('MAIL').value;
     var pass = document.getElementById('PASS')
 
+    console.log(pass)
     if(pass !== null ){
         const regex = new RegExp("(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
         const match = regex.test(pass.value)
         if(!match){
             return document.getElementById("showError").innerHTML = "Password invalida, debe contener: </br> 1 letra minuscula, 1 letra mayuscula, un caracter especial '@,#,$' y debe ser mayor o igual a 8"
+        }else{
+            document.getElementById("showError").innerHTML = "";
         }
-
     }
     
-    if( myForm.nombre.value == "" ) {
+    if( myForm.nombre && myForm.nombre.value == "" ) {
         alert( "Porfavor ingresa alguna nombre!!" );
         myForm.nombre.focus() ;
         return false;
     }
-    if( myForm.phone.value == "" ) {
+    if( myForm.phone && myForm.phone.value == "" ) {
         alert( "Porfavor ingresa alguna telefono!!" );
         myForm.phone.focus() ;
         return false;

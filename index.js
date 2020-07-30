@@ -9,6 +9,15 @@ const session = require('express-session');
 const { config } = require("./config")
 const cors = require('cors')
 const axios = require('axios')
+var nodemailer = require('nodemailer');
+var transporter = nodemailer.createTransport({
+ service: 'gmail',
+ auth: {
+        user: process.env.GMAIL,
+        pass: process.env.PMAIL
+    }
+});
+
 app.use(cors())
 app.use(session(config.session));
 app.use(bodyParser.json());
@@ -82,24 +91,44 @@ app.post('/save', async (req, res) => {
     
     sess=req.session;
     const { mail, password, nombre, phone } = req.body
+    console.log( mail, password, nombre, phone )
+    
+    const max = 999999
+    const min = 100000
+    const random = (Math.random() * (max - min) + min).toFixed(0)
 
     const pass = Buffer.from(password).toString('base64')
 
     const result = await sql.connect(config.db).then( pool => {
            return pool.request()
+            .input('nombre', sql.TYPES.VarChar, nombre)
             .input('mail', sql.TYPES.VarChar, mail)
             .input('pass', sql.TYPES.VarChar, pass)
-            .input('nombre', sql.TYPES.VarChar, nombre)
             .input('phone', sql.TYPES.VarChar, phone)
-            .query('insert into login(nombre, email, pass, phone) values(@nombre, @mail, @pass, @phone)')
+            .input('code', sql.TYPES.VarChar, random)
+            .query('insert into login(nombre, email, pass, phone, code) values(@nombre, @mail, @pass, @phone, @code )')
         }).catch(e => {
             console.log(e)
             return false
-        })
+    })
     
-    sess.nombre = nombre
-    sess.loged = true;
-    return res.redirect('home');
+    const mailOptions = {
+        from: process.env.GMAIL,
+        to: mail,
+        subject: 'Landing Page', 
+        html: `<h1>Bienvenido</h1> <br> ingresa con el siguiente codigo: ${random}`
+    };
+    
+    transporter.sendMail(mailOptions, function (err, info) {
+        if(err)
+            console.log(err)
+        else
+            console.log(info);
+    });
+    
+    //sess.nombre = nombre
+    //sess.loged = true;
+    return res.redirect('login');
 })
 
 app.post('/logout', (req,res) => {
@@ -138,7 +167,8 @@ app.post('/verify', async (req,res) =>{
             message : "Valid recaptcha",
             reason : result.data
         });
-    } })
+    } 
+})
 
 app.use(function(req,res){
     res.status(404).send('<div><center> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>');
