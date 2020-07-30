@@ -25,8 +25,8 @@
             
             
         </div>
-            <% if (error) { %>
-            <h1 style="padding-left:80px; color: red">Tu mail o password es incorrecto</h1>
+            <% if (error.status) { %>
+            <h1 style="padding-left:80px; color: red"><%= error.message %></h1>
             <% } %>
     </body>
     <script src="time.js"></script>

@@ -29,12 +29,14 @@
                             <form id="demo-form" method="POST" action="/login">
                                 <% } %> 
                                 <input id="MAIL" type="email" required="required" name="mail" placeholder="Email" />
-                                <input type="password" required="required" name="password" placeholder="Password" />
                                 <% if (nuevo) { %>
-                                <input type="text" name="nombre" placeholder="Name" />
-                                <input type="text" name="phone"  maxlength="8" placeholder="Phone" />
-                                <% } %>
-                                <input type="submit" value="Ingresar"  class="g-recaptcha" 
+                                <input id="PASS" type="password"  required="required" name="password" placeholder="Password" />
+                                <input type="text" required="required" name="nombre" placeholder="Name" />
+                                <input type="text" required="required" name="phone"  maxlength="8" placeholder="Phone" />
+                                <% } else { %>
+                                    <input type="password" required="required" name="password" placeholder="Password" />
+                                <% } %> 
+                                <input type="submit" value="Ingresar" class="g-recaptcha" 
                                         data-sitekey="6Ld_-bcZAAAAABS8Cm7QvKW43L1UcK_Dmql_tUBp" 
                                         data-callback='onSubmit' 
                                         data-action='submit'></input>
@@ -47,6 +49,7 @@
         <div class="wave">
             <div style="height: 150px; overflow: hidden;" ><svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #fff;"></path></svg></div>
         </div>
+        <p id="showError" style="padding-left:80px; color: red"></p>
         <script src="captcha.js"> </script>
     </body>
 </html>

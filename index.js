@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
         return res.render('home', {name : sess.nombre})
     }
 
-    return res.render('landingpage', { error : false})
+    return res.render('landingpage', { error : { status : false, message : "" }})
 })
 
 app.get('/login', async (req, res) => {
@@ -57,13 +57,13 @@ app.post('/login', async (req, res) => {
     
     const {recordset} = result
     if(recordset.length <= 0){
-        return res.render('landingpage', {error : true})
+        return res.render('landingpage', {error : { status : true, message : "No existe ningun usuario registrado con este correo" }})
     }
     const {pass,nombre} = recordset.shift()
     const correctLogin = pass === Buffer.from(password).toString('base64')
 
     if(!correctLogin){
-        return res.render('landingpage', {error : true})
+        return res.render('landingpage', {error : { status : true , message : "Password Incorrecta" } } )
     }
     sess.loged = true;
     sess.nombre = nombre;
@@ -73,7 +73,7 @@ app.post('/login', async (req, res) => {
 app.get('/home', (req, res)=> {
     sess = req.session;
     if(!sess.loged){
-        return res.render('landingpage', {error : false})
+        return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
     }
     return res.render('home', { name : sess.nombre })
 })
@@ -138,8 +138,7 @@ app.post('/verify', async (req,res) =>{
             message : "Valid recaptcha",
             reason : result.data
         });
-    }
-})
+    } })
 
 app.use(function(req,res){
     res.status(404).send('<div><center> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>');
