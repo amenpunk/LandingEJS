@@ -45,6 +45,31 @@ app.get('/login', async (req, res) => {
     sess = req.session;
     const register = req.query.name ? true : false
     
+    if(sess.try && sess.try.num === 3){
+        if(sess.try.email.length > 0){
+            /* TODO
+             * query to move all mails to blacklist
+             * then delete all temp mails from session
+             * in login execute query to search if mail is in the blacklist
+             */
+
+            let toBLACK = sess.try.email.map(mail => {
+                return new Promise((resolve, _r) => {
+                    sql.connect(config.db).then( pool => {
+                        return pool.request()
+                            .input('mail', sql.TYPES.VarChar, mail )
+                            .query('insert into blacklist(mail) values(@mail)')
+                    }).catch(e => {
+                        console.log(e)
+                        resolve(e)
+                    })
+                })
+            })
+            sess.try.email = []
+        }
+        return res.render('landingpage', {error : { status : true , message : "Tu cuenta esta bloqueada, contacta con soporte tecnico para volver a ingresar" } } )
+    }
+
     if(sess.loged){
         return res.render('home', {name : sess.name, nuevo : register})
     }
@@ -55,6 +80,21 @@ app.post('/login', async (req, res) => {
 
     const { mail, password, code } = req.body
     sess=req.session;
+    console.log(sess)
+    
+    const black = await sql.connect(config.db).then( pool => {
+        return pool.request()
+            .input('mail', sql.TYPES.VarChar, mail)
+            .query('select * from blacklist where mail = @mail')
+    }).catch(e => {
+        console.log(e)
+        return false
+    })
+    
+    const {recordset : list} = black
+    if(list.length > 0){
+        return res.render('landingpage', {error : { status : true, message : `Este correo esta en la lista negra` }})
+    }
 
     const result = await sql.connect(config.db).then( pool => {
         return pool.request()
@@ -67,17 +107,20 @@ app.post('/login', async (req, res) => {
     
     const {recordset} = result
     if(recordset.length <= 0){
-        return res.render('landingpage', {error : { status : true, message : "No existe ningun usuario registrado con este correo" }})
+        sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
+        return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo, intentos restante ${3 - sess.try.num}` }})
     }
     const {pass,nombre, code : secret} = recordset.shift()
     const correctLogin = pass === Buffer.from(password).toString('base64')
 
     if(!correctLogin){
-        return res.render('landingpage', {error : { status : true , message : "Password Incorrecta" } } )
+        sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
+        return res.render('landingpage', {error : { status : true , message : `Password Incorrecta, intentos restantes ${3 - sess.try.num}` } } )
     }
     
     if(code !== secret){
-        return res.render('landingpage', {error : { status : true , message : "Codigo de acceso incorrecto" } } )
+        sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
+        return res.render('landingpage', {error : { status : true , message : `Codigo de acceso incorrecto, intentos restantes ${3 - sess.try.num}` } } )
     }
     sess.loged = true;
     sess.nombre = nombre;

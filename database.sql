@@ -9,3 +9,6 @@ create table login(
     CONSTRAINT pk_ad PRIMARY KEY(id)
 )
 insert into login(nombre,email,pass,phone,code) values('ming', 'ming@ming.com', '$xxx31mmM', '55552222', '1111')
+create table blacklist(
+	mail varchar(250)
+)
