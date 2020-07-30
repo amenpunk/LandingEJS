@@ -1,5 +1,4 @@
 const MaxTime = 60000
-//const twilio = require('twilio')(process.env.TWILIO_ACCOUNT, process.env.TWILIO_TOKEN);
 
 module.exports.config = {
 

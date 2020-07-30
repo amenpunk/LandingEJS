@@ -9,7 +9,8 @@ const session = require('express-session');
 const { config } = require("./config")
 const cors = require('cors')
 const axios = require('axios')
-var nodemailer = require('nodemailer');
+const nodemailer = require('nodemailer');
+const twilio = require('twilio')(process.env.TWILIO_ACCOUNT, process.env.TWILIO_TOKEN);
 var transporter = nodemailer.createTransport({
  service: 'gmail',
  auth: {
@@ -52,7 +53,7 @@ app.get('/login', async (req, res) => {
 
 app.post('/login', async (req, res) => {
 
-    const { mail, password } = req.body
+    const { mail, password, code } = req.body
     sess=req.session;
 
     const result = await sql.connect(config.db).then( pool => {
@@ -68,11 +69,15 @@ app.post('/login', async (req, res) => {
     if(recordset.length <= 0){
         return res.render('landingpage', {error : { status : true, message : "No existe ningun usuario registrado con este correo" }})
     }
-    const {pass,nombre} = recordset.shift()
+    const {pass,nombre, code : secret} = recordset.shift()
     const correctLogin = pass === Buffer.from(password).toString('base64')
 
     if(!correctLogin){
         return res.render('landingpage', {error : { status : true , message : "Password Incorrecta" } } )
+    }
+    
+    if(code !== secret){
+        return res.render('landingpage', {error : { status : true , message : "Codigo de acceso incorrecto" } } )
     }
     sess.loged = true;
     sess.nombre = nombre;
@@ -125,6 +130,14 @@ app.post('/save', async (req, res) => {
         else
             console.log(info);
     });
+    
+    twilio.messages
+        .create({
+            body: `Tu codigo de ingreso es ${random}`,
+            from: '+12054798880',
+            to: `+502${phone}`
+        })
+        .then(message => console.log(message.sid));
     
     //sess.nombre = nombre
     //sess.loged = true;
