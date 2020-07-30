@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="estilos.css">
         <title>Landing Page</title>
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:300,400,700,800&display=swap" rel="stylesheet">
+        <script src="https://www.google.com/recaptcha/api.js?render=6Ld_-bcZAAAAABS8Cm7QvKW43L1UcK_Dmql_tUBp"></script>
     </head>
     <body>
         <header>
@@ -23,17 +24,20 @@
                     <center class="container">
 
                         <% if (nuevo) { %>
-                        <form method="POST" action="/save">
+                        <form id="demo-form" method="POST" action="/save">
                             <% } else { %>
-                            <form method="POST" action="/login">
+                            <form id="demo-form" method="POST" action="/login">
                                 <% } %> 
-                                <input type="email" name="mail" placeholder="Email" />
-                                <input type="password" name="password" placeholder="Password" />
+                                <input id="MAIL" type="email" required="required" name="mail" placeholder="Email" />
+                                <input type="password" required="required" name="password" placeholder="Password" />
                                 <% if (nuevo) { %>
                                 <input type="text" name="nombre" placeholder="Name" />
                                 <input type="text" name="phone"  maxlength="8" placeholder="Phone" />
                                 <% } %>
-                                <input type="submit" value="Ingresar" />
+                                <input type="submit" value="Ingresar"  class="g-recaptcha" 
+                                        data-sitekey="6Ld_-bcZAAAAABS8Cm7QvKW43L1UcK_Dmql_tUBp" 
+                                        data-callback='onSubmit' 
+                                        data-action='submit'></input>
                             </form>
                     </center>
 
@@ -43,5 +47,6 @@
         <div class="wave">
             <div style="height: 150px; overflow: hidden;" ><svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #fff;"></path></svg></div>
         </div>
+        <script src="captcha.js"> </script>
     </body>
 </html>

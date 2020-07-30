@@ -3,13 +3,15 @@ const app = expres()
 const PORT = process.env.PORT || 8080;
 const dotenv = require('dotenv');
 dotenv.config();
+const bodyParser = require('body-parser');
 const sql = require('mssql')
 const session = require('express-session');
 const { config } = require("./config")
 const cors = require('cors')
+const axios = require('axios')
 app.use(cors())
 app.use(session(config.session));
-
+app.use(bodyParser.json());
 
 app.use(expres.urlencoded({ extended: true }))
 app.set('view engine', 'ejs')
@@ -31,7 +33,6 @@ app.get('/', (req, res) => {
 app.get('/login', async (req, res) => {
     
     sess = req.session;
-    console.log(sess)
     const register = req.query.name ? true : false
     
     if(sess.loged){
@@ -44,7 +45,6 @@ app.post('/login', async (req, res) => {
 
     const { mail, password } = req.body
     sess=req.session;
-    console.log(sess)
 
     const result = await sql.connect(config.db).then( pool => {
         return pool.request()
@@ -109,6 +109,36 @@ app.post('/logout', (req,res) => {
         }
         res.redirect('/');
     });
+})
+
+app.post('/verify', async (req,res) =>{
+
+    const {token , value } = req.body;
+
+    var result = await axios.post("https://www.google.com/recaptcha/api/siteverify", {}, {
+        params: {
+            secret: process.env.CAPTCHA_SECRET,
+            response: token
+        }
+    });
+    console.log(result.data)
+    const {success } = result.data
+
+    if(!success) {
+        return res.status(200).json({
+            status : 0,
+            title :  "Error",
+            message : "Invalid recaptcha",
+            reason : result.data
+        });
+    }else{
+        return res.status(200).json({
+            status : 1,
+            title :  "success",
+            message : "Valid recaptcha",
+            reason : result.data
+        });
+    }
 })
 
 app.use(function(req,res){
