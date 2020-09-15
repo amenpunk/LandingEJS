@@ -47,12 +47,6 @@ app.get('/login', async (req, res) => {
     
     if(sess.try && sess.try.num === 3){
         if(sess.try.email.length > 0){
-            /* TODO
-             * query to move all mails to blacklist
-             * then delete all temp mails from session
-             * in login execute query to search if mail is in the blacklist
-             */
-
             let toBLACK = sess.try.email.map(mail => {
                 return new Promise((resolve, _r) => {
                     sql.connect(config.db).then( pool => {
@@ -174,16 +168,16 @@ app.post('/save', async (req, res) => {
             console.log(info);
     });
     
-    twilio.messages
+    /*twilio.messages
         .create({
             body: `Tu codigo de ingreso es ${random}`,
             from: '+12054798880',
             to: `+502${phone}`
         })
         .then(message => console.log(message.sid));
-    
-    //sess.nombre = nombre
-    //sess.loged = true;
+    sess.nombre = nombre
+    sess.loged = true;
+    */
     return res.redirect('login');
 })
 
@@ -226,7 +220,39 @@ app.post('/verify', async (req,res) =>{
     } 
 })
 
+app.get('/roles', async (req, res)=> {
+    
+    const list = sql.connect(config.db).then( pool => {
+        return pool.request()
+            .query('select * from login l inner join role r on l.id = r.id')
+    }).catch(e => {
+        console.log(e)
+        return false
+    })
+    let Result = await list;
+    const {recordset : Users} = Result
+    return res.render('roles', { Users })
+})
+
+app.post('/UpdateRol', async (req, res)=> {
+    const {id, access_code} = req.body;
+
+    let up = sql.connect(config.db).then( pool => {
+        return pool.request()
+            .input('id', sql.TYPES.VarChar, id )
+            .input('access_code', sql.TYPES.VarChar, access_code )
+            .query('update role set access_code=(@access_code) where id=(@id)')
+    }).catch(e => {
+        console.log(e)
+        resolve(e)
+    })
+    let result = await up;
+    console.log(result)
+    return res.status(200).send({"status": "ok"})
+})
+
 app.use(function(req,res){
+                
     res.status(404).send('<div><center> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>');
 });
 

@@ -1,11 +1,12 @@
-const MaxTime = 60000
+//const MaxTime = 60000
+const MaxTime = 30000
 
 module.exports.config = {
 
     session : {
         secret: process.env.SESSION,
         cookie :{
-            maxAge : new Date(Date.now() + MaxTime),
+            maxAge : MaxTime,
             expires : MaxTime
         }
     },

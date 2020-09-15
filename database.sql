@@ -8,6 +8,14 @@ create table login(
     code varchar(250),
     CONSTRAINT pk_ad PRIMARY KEY(id)
 )
+
+create table role(
+    id int,
+    access_code varchar(3),
+    CONSTRAINT pk_role PRIMARY KEY(id),
+    CONSTRAINT fk_role FOREIGN KEY(id) REFERENCES login(id)
+)
+
 insert into login(nombre,email,pass,phone,code) values('ming', 'ming@ming.com', '$xxx31mmM', '55552222', '1111')
 create table blacklist(
 	mail varchar(250)

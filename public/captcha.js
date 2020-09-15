@@ -33,8 +33,8 @@ function onSubmit(token) {
         myForm.nombre.focus() ;
         return false;
     }
-    if( myForm.phone && myForm.phone.value == "" ) {
-        alert( "Porfavor ingresa alguna telefono!!" );
+    if( myForm.phone && myForm.phone.value == ""  && myForm.phone.length != 8) {
+        alert( "Porfavor ingresa alguna telefono valido!!" );
         myForm.phone.focus() ;
         return false;
     }
@@ -60,4 +60,42 @@ function onSubmit(token) {
             }
         })
         .catch(error => console.error(error) );
+}
+
+
+function Actualizar(id){
+    let lec = document.getElementById(`lec-${id}`)
+    let esc  = document.getElementById(`esc-${id}`)
+    let mod  = document.getElementById(`mod-${id}`)
+    let NuevoPermiso = (lec.checked ? "1" : "0").concat(esc.checked ? "1" : "0").concat(mod.checked ? "1" : "0")
+    
+    const data = {
+        id: id,
+        access_code: NuevoPermiso
+    };
+    fetch('/UpdateRol', {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(data)
+    }).then( response => response.json() )
+        .then(result => {
+            const {status, message} = result
+            swal({
+                title: "Operacion Completada",
+                text: "Registro Actualizado",
+                icon: "success",
+            });
+        })
+        .catch(error => {
+            console.log("err", error)
+            swal({
+                title: "Ups",
+                text: "Ocurrio un error",
+                icon: "error",
+            });
+        });
+
 }
