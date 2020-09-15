@@ -1,7 +1,6 @@
 const myForm = document.getElementById("demo-form")
 
 function onSubmit(token) {
-    
 
     if( myForm.mail.value == "" ) {
         alert( "Porfavor ingresa tu email!!" );
@@ -83,11 +82,19 @@ function Actualizar(id){
     }).then( response => response.json() )
         .then(result => {
             const {status, message} = result
-            swal({
-                title: "Operacion Completada",
-                text: "Registro Actualizado",
-                icon: "success",
-            });
+            if(status){
+                swal({
+                    title: "Exito!!",
+                    text: message,
+                    icon: "success",
+                });
+            }else{
+                swal({
+                    title: "Ups",
+                    text: message,
+                    icon: "error",
+                });
+            }
         })
         .catch(error => {
             console.log("err", error)

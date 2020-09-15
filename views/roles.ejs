@@ -6,7 +6,6 @@
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <link rel="stylesheet" href="estilos.css">
         <title>Landing Page</title>
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:300,400,700,800&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     </head>
@@ -39,11 +38,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+
                             <% for(var i=0; i < Users.length; i++) {
                                 let gg = Users[i].access_code.toString().split('');
                                 let id = Users[i].id.shift()
                                 let [lec, esc, mod] = gg %>
+                        <tr>
                             <td><%= Users[i].nombre %></td>
                             <td><%= Users[i].email %></td>
                                <td> 
@@ -62,8 +62,8 @@
                                 </center>
                                </td>
                                <td><button onclick="Actualizar(<%=id%>)" class="btn btn-success"><center>Actualizar</center></button></td>
-                            <% } %>
                         </tr>
+                            <% } %>
                     </tbody>
                 </table>
             </center>

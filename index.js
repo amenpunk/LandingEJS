@@ -131,6 +131,7 @@ app.get('/home', (req, res)=> {
 
 app.post('/save', async (req, res) => {
     
+    console.log(req.body)
     sess=req.session;
     const { mail, password, nombre, phone } = req.body
     console.log( mail, password, nombre, phone )
@@ -140,7 +141,6 @@ app.post('/save', async (req, res) => {
     const random = (Math.random() * (max - min) + min).toFixed(0)
 
     const pass = Buffer.from(password).toString('base64')
-
     const result = await sql.connect(config.db).then( pool => {
            return pool.request()
             .input('nombre', sql.TYPES.VarChar, nombre)
@@ -220,7 +220,7 @@ app.post('/verify', async (req,res) =>{
     } 
 })
 
-app.get('/roles', async (req, res)=> {
+app.get('/users', async (req, res)=> {
     
     const list = sql.connect(config.db).then( pool => {
         return pool.request()
@@ -247,12 +247,27 @@ app.post('/UpdateRol', async (req, res)=> {
         resolve(e)
     })
     let result = await up;
-    console.log(result)
-    return res.status(200).send({"status": "ok"})
+    let {rowsAffected} = result
+    let aff = parseInt(rowsAffected.shift()) > 0
+    if(aff){
+        return res.status(200).json({
+            status : 1,
+            title :  "success",
+            message : "Permiso actualizado",
+            reason : result
+        });
+    }else{
+        return res.status(200).json({
+            status : 0,
+            title :  "Error",
+            message : "No fue posible actulizar el registro",
+            reason : result
+        });
+
+    }
 })
 
 app.use(function(req,res){
-                
     res.status(404).send('<div><center> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>');
 });
 

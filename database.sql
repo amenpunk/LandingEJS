@@ -20,3 +20,8 @@ insert into login(nombre,email,pass,phone,code) values('ming', 'ming@ming.com', 
 create table blacklist(
 	mail varchar(250)
 )
+
+create trigger tg_set_role on login after insert 
+AS
+declare @id_user int = (select IDENT_CURRENT('login'))
+insert into role values(@id_user, '100')
