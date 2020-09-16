@@ -11,6 +11,12 @@ const cors = require('cors')
 const axios = require('axios')
 const nodemailer = require('nodemailer');
 const twilio = require('twilio')(process.env.TWILIO_ACCOUNT, process.env.TWILIO_TOKEN);
+const path = require('path');
+const mime = require('mime');
+const fs = require('fs');
+const multer = require('multer');
+const upload = multer({ storage: config.storage })
+
 var transporter = nodemailer.createTransport({
  service: 'gmail',
  auth: {
@@ -45,6 +51,7 @@ app.get('/login', async (req, res) => {
     sess = req.session;
     const register = req.query.name ? true : false
     
+    /*
     if(sess.try && sess.try.num === 3){
         if(sess.try.email.length > 0){
             let toBLACK = sess.try.email.map(mail => {
@@ -63,6 +70,7 @@ app.get('/login', async (req, res) => {
         }
         return res.render('landingpage', {error : { status : true , message : "Tu cuenta esta bloqueada, contacta con soporte tecnico para volver a ingresar" } } )
     }
+    */
 
     if(sess.loged){
         return res.render('home', {name : sess.name, nuevo : register})
@@ -101,20 +109,23 @@ app.post('/login', async (req, res) => {
     
     const {recordset} = result
     if(recordset.length <= 0){
-        sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
-        return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo, intentos restante ${3 - sess.try.num}` }})
+        //sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
+        //return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo, intentos restante ${3 - sess.try.num}` }})
+        return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo` }})
     }
     const {pass,nombre, code : secret} = recordset.shift()
     const correctLogin = pass === Buffer.from(password).toString('base64')
 
     if(!correctLogin){
-        sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
-        return res.render('landingpage', {error : { status : true , message : `Password Incorrecta, intentos restantes ${3 - sess.try.num}` } } )
+        //sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
+        //return res.render('landingpage', {error : { status : true , message : `Password Incorrecta, intentos restantes ${3 - sess.try.num}` } } )
+        return res.render('landingpage', {error : { status : true , message : `Password Incorrecta` } } )
     }
     
     if(code !== secret){
-        sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
-        return res.render('landingpage', {error : { status : true , message : `Codigo de acceso incorrecto, intentos restantes ${3 - sess.try.num}` } } )
+        //sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
+        ///return res.render('landingpage', {error : { status : true , message : `Codigo de acceso incorrecto, intentos restantes ${3 - sess.try.num}` } } )
+        return res.render('landingpage', {error : { status : true , message : `Codigo de acceso incorrecto` } } )
     }
     sess.loged = true;
     sess.nombre = nombre;
@@ -266,6 +277,35 @@ app.post('/UpdateRol', async (req, res)=> {
 
     }
 })
+
+app.get('/upload', function(req, res){
+    return res.render('upload')
+})
+
+app.post('/upload', upload.single('myFile'), (req, res, next) => {
+    try{
+        const file = req.file
+        if (!file) {
+            const error = new Error('Please upload a file')
+            error.httpStatusCode = 400
+            return next(error)
+        }
+        return res.send(file)
+    }catch(e){
+        return res.status(400).redirect('/', {error: e.message})
+    }
+})
+
+app.get('/download', function(req, res){
+    const {name} = req.body;
+    var file = __dirname + `/FILES/${name}`;
+    var filename = path.basename(file);
+    var mimetype = mime.lookup(file);
+    res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+    res.setHeader('Content-type', mimetype);
+    var filestream = fs.createReadStream(file);
+    filestream.pipe(res);
+});
 
 app.use(function(req,res){
     res.status(404).send('<div><center> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>');
