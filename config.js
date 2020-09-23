@@ -1,5 +1,5 @@
 //const MaxTime = 60000
-const MaxTime = 30000
+const MaxTime = 9000000000000
 const multer = require('multer'); 
 module.exports.config = {
 
@@ -22,7 +22,6 @@ module.exports.config = {
             cb(null, 'FILES')
         },
         filename: function (req, file, cb) {
-            console.log(file)
             cb(null, file.originalname)
         }
     })

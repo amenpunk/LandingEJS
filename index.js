@@ -113,7 +113,7 @@ app.post('/login', async (req, res) => {
         //return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo, intentos restante ${3 - sess.try.num}` }})
         return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo` }})
     }
-    const {pass,nombre, code : secret} = recordset.shift()
+    const {pass,nombre, code : secret, id} = recordset.shift()
     const correctLogin = pass === Buffer.from(password).toString('base64')
 
     if(!correctLogin){
@@ -129,6 +129,7 @@ app.post('/login', async (req, res) => {
     }
     sess.loged = true;
     sess.nombre = nombre;
+    sess.id_user = id
     return res.redirect('home')
 })
 
@@ -279,20 +280,33 @@ app.post('/UpdateRol', async (req, res)=> {
 })
 
 app.get('/upload', function(req, res){
+    sess = req.session;
     return res.render('upload')
 })
 
-app.post('/upload', upload.single('myFile'), (req, res, next) => {
+app.post('/upload', upload.single('myFile'), async (req, res) => {
     try{
         const file = req.file
+        console.log("from the api ",file)
+        sess = req.session;
         if (!file) {
-            const error = new Error('Please upload a file')
-            error.httpStatusCode = 400
-            return next(error)
+            return res.send(`<div style="font-size:30px"><center><h1>El archivo ingresado no es valido </h1><script> setTimeout(function(){ window.location.href = '/upload'; },3000); </script> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>`);
         }
-        return res.send(file)
+        let mark = new Date().toLocaleString()
+        const logger = await sql.connect(config.db).then( pool => {
+            return pool.request()
+                .input('mark', sql.TYPES.DateTime, mark )
+                .input('event', sql.TYPES.VarChar, "UPLOAD")
+                .input('usuario', sql.TYPES.Int, sess.id_user )
+                .input('file_name', sql.TYPES.VarChar, file.originalname )
+                .query('insert into file_logs(mark, event, usuario, file_name) values(@mark, @event, @usuario, @file_name  )')
+        }).catch(e => {
+            console.log(e)
+            return false
+        })
+        return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se ha subido!!!!</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://i0.pngocean.com/files/873/563/814/computer-icons-icon-design-business-success.jpg"/> </center></div>`);
     }catch(e){
-        return res.status(400).redirect('/', {error: e.message})
+        res.redirect('/', {error: e.message})
     }
 })
 

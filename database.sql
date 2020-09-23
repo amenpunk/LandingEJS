@@ -21,6 +21,14 @@ create table blacklist(
 	mail varchar(250)
 )
 
+create table file_logs(
+    mark datetime,
+    event varchar(250),
+    usuario int,
+    file_name varchar(250),
+    CONSTRAINT fk_file FOREIGN KEY(usuario) REFERENCES login(id)
+)
+
 create trigger tg_set_role on login after insert 
 AS
 declare @id_user int = (select IDENT_CURRENT('login'))
