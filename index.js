@@ -237,6 +237,14 @@ app.post('/verify', async (req,res) =>{
 
 app.get('/users', async (req, res)=> {
     
+    sess = req.session;
+    if(!sess.loged){
+        return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
+    }
+    let permiso = sess.access.split("");
+    if(parseInt(permiso[2]) !== 1 ){
+        return res.render('landingpage', {error : { status : true , message : "Tu usuario no puede modificar los permisos :( " }})
+    }
     const list = sql.connect(config.db).then( pool => {
         return pool.request()
             .query('select * from login l inner join role r on l.id = r.id')
@@ -299,7 +307,6 @@ app.get('/upload', function(req, res){
 app.post('/upload', upload.single('myFile'), async (req, res) => {
     try{
         const file = req.file
-        console.log("from the api ",file)
         sess = req.session;
         if (!file) {
             return res.send(`<div style="font-size:30px"><center><h1>El archivo ingresado no es valido </h1><script> setTimeout(function(){ window.location.href = '/upload'; },3000); </script> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>`);
@@ -309,7 +316,8 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
                 .input('event', sql.TYPES.VarChar, "UPLOAD")
                 .input('usuario', sql.TYPES.Int, sess.id_user )
                 .input('file_name', sql.TYPES.VarChar, file.originalname )
-                .query('insert into file_logs(mark, event, usuario, file_name) values(GETDATE(),@event, @usuario, @file_name  )')
+                .input('file_type', sql.TYPES.VarChar, file.mimetype )
+                .query('insert into file_logs(mark, event, usuario, file_name, file_type) values(GETDATE(),@event, @usuario, @file_name, @file_type  )')
         }).catch(e => {
             console.log(e)
             return false

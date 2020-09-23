@@ -26,6 +26,7 @@ create table file_logs(
     event varchar(250),
     usuario int,
     file_name varchar(250),
+    file_type varchar(250),
     CONSTRAINT fk_file FOREIGN KEY(usuario) REFERENCES login(id)
 )
 
