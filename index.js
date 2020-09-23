@@ -101,19 +101,21 @@ app.post('/login', async (req, res) => {
     const result = await sql.connect(config.db).then( pool => {
         return pool.request()
             .input('input_parameter', sql.TYPES.VarChar, mail)
-            .query('select * from login where email = @input_parameter')
+            .query('select * from login l inner join role r on l.id = r.id where email=@input_parameter')
+            //.query('select * from login where email = @input_parameter')
     }).catch(e => {
         console.log(e)
         return false
     })
     
     const {recordset} = result
+    console.log("recordset", recordset)
     if(recordset.length <= 0){
         //sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
         //return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo, intentos restante ${3 - sess.try.num}` }})
         return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo` }})
     }
-    const {pass,nombre, code : secret, id} = recordset.shift()
+    const {pass,nombre, code : secret, id, access_code } = recordset.shift()
     const correctLogin = pass === Buffer.from(password).toString('base64')
 
     if(!correctLogin){
@@ -129,7 +131,8 @@ app.post('/login', async (req, res) => {
     }
     sess.loged = true;
     sess.nombre = nombre;
-    sess.id_user = id
+    sess.id_user = id[0]
+    sess.access = access_code
     return res.redirect('home')
 })
 
@@ -281,6 +284,15 @@ app.post('/UpdateRol', async (req, res)=> {
 
 app.get('/upload', function(req, res){
     sess = req.session;
+    if(!sess.loged){
+        return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
+    }
+    let permiso = sess.access.split("");
+    
+    if(parseInt(permiso[1]) !== 1 ){
+        return res.render('landingpage', {error : { status : true , message : "Tu usuario no puede subir archivos :(" }})
+    }
+
     return res.render('upload')
 })
 
@@ -292,14 +304,12 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
         if (!file) {
             return res.send(`<div style="font-size:30px"><center><h1>El archivo ingresado no es valido </h1><script> setTimeout(function(){ window.location.href = '/upload'; },3000); </script> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>`);
         }
-        let mark = new Date().toLocaleString()
         const logger = await sql.connect(config.db).then( pool => {
             return pool.request()
-                .input('mark', sql.TYPES.DateTime, mark )
                 .input('event', sql.TYPES.VarChar, "UPLOAD")
                 .input('usuario', sql.TYPES.Int, sess.id_user )
                 .input('file_name', sql.TYPES.VarChar, file.originalname )
-                .query('insert into file_logs(mark, event, usuario, file_name) values(@mark, @event, @usuario, @file_name  )')
+                .query('insert into file_logs(mark, event, usuario, file_name) values(GETDATE(),@event, @usuario, @file_name  )')
         }).catch(e => {
             console.log(e)
             return false
@@ -310,8 +320,9 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
     }
 })
 
-app.get('/download', function(req, res){
-    const {name} = req.body;
+app.get('/download/:id', function(req, res){
+    const name = req.params.id
+    sess = req.session;
     var file = __dirname + `/FILES/${name}`;
     var filename = path.basename(file);
     var mimetype = mime.lookup(file);
@@ -319,7 +330,41 @@ app.get('/download', function(req, res){
     res.setHeader('Content-type', mimetype);
     var filestream = fs.createReadStream(file);
     filestream.pipe(res);
+        
+    const logger = sql.connect(config.db).then( pool => {
+        return pool.request()
+            .input('event', sql.TYPES.VarChar, "DOWNLOAD")
+            .input('usuario', sql.TYPES.Int, sess.id_user )
+            .input('file_name', sql.TYPES.VarChar, name )
+            .query('insert into file_logs(mark, event, usuario, file_name) values(GETDATE(),@event, @usuario, @file_name  )')
+    }).catch(e => {
+        console.log(e)
+        return false
+    })
 });
+
+app.get('/files', async (req,res) => {
+    sess = req.session;
+    if(!sess.loged){
+        return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
+    }
+    let permiso = sess.access.split("");
+
+    if(parseInt(permiso[0]) !== 1 ){
+        return res.render('landingpage', {error : { status : true , message : "Tu usuario no puede ver los archivos :(" }})
+    }
+
+    const list = sql.connect(config.db).then( pool => {
+        return pool.request()
+            .query('select * from file_logs')
+    }).catch(e => {
+        console.log(e)
+        return false
+    })
+    let Result = await list;
+    const {recordset : Files} = Result
+    return res.render('files', { Files })
+})
 
 app.use(function(req,res){
     res.status(404).send('<div><center> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>');

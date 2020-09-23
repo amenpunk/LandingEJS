@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
         <link rel="stylesheet" href="estilos.css">
         <title>Landing Page</title>
         <link href="https://fonts.googleapis.com/css2?family=Open+Sans:300,400,700,800&display=swap" rel="stylesheet">
@@ -19,8 +20,11 @@
                     </center>
                     <center>
                         <form action="/logout", method='post'>
-                            <input type="submit" value="Salir" />
+                            <input class="btn btn-danger" type="submit" value="Salir" />
                         </form>
+                        <a class="btn btn-primary" href="/upload" >Subir Archivos</a>
+                        <a class="btn btn-success" href="/files" >Descargar Archivos</a>
+                        <a class="btn btn-warning" href="/users" >Editar Roles</a>
                     </center>
                 </div>
                 <img src="https://media1.tenor.com/images/03fb298c0fcdc275bcfbc5a8cb5d4b3f/tenor.gif?itemid=10431835" alt=""/>
