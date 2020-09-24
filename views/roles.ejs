@@ -25,25 +25,20 @@
                 <table class="tg">
                     <thead>
                         <tr>
-                            <th class="tg-0pky">
-                                <center>Nombre</center>
-                            </th>
+                            <th class="tg-0pky"> <center>ID</center> </th>
+                            <th class="tg-0pky"> <center>Nombre</center> </th>
                             <th class="tg-0pky"><center>Email</center></th>
-                            <th class="tg-0pky">
-                                <center>
-                                    [ Lectura | Escritura | Modificacion ]
-                                </center>
-                            </th>
+                            <th class="tg-0pky"> <center> [ Lectura | Escritura | Modificacion ] </center> </th>
                             <th class="tg-0pky"><center>Operacion</center></th>
                         </tr>
                     </thead>
                     <tbody>
-
-                            <% for(var i=0; i < Users.length; i++) {
+                        <% for(var i=0; i < Users.length; i++) {
                                 let gg = Users[i].access_code.toString().split('');
                                 let id = Users[i].id.shift()
                                 let [lec, esc, mod] = gg %>
-                        <tr>
+                                <tr>
+                            <td><%= Users[i].id %></td>
                             <td><%= Users[i].nombre %></td>
                             <td><%= Users[i].email %></td>
                                <td> 

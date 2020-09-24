@@ -10,31 +10,14 @@
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     </head>
     <body>
-        <header>
-            <div class="container">
-                <center>
-                    <h1 class="treinta">Sube un archivo al servidor</h1>
-                </center>
-            </div>
-        </header>
-        <div class="wave">
-            <div style="height: 150px; overflow: hidden;" ><svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #fff;"></path></svg></div>
-        </div>
+        <header> <div class="container"> <center> <h1 class="treinta">Sube un archivo al servidor</h1> </center> </div> </header>
+        <div class="wave"> <div style="height: 150px; overflow: hidden;" ><svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #fff;"></path></svg></div> </div>
         <main class="container">
             <div class="row">
-
                 <form action="/upload" enctype="multipart/form-data" method="POST"> 
-
-                    <div class="col">
-                        <input type="file" class="btn btn-outline-primary" name="myFile" />
-                    </div>
-
-                    </br>
-                    <div class="col">
-                        <input type="submit" class="btn btn-danger" value="Confirmar"/>
-                    </div>
+                    <div class="col"> <input type="file" class="btn btn-outline-primary" name="myFile" /></div> </br>
+                    <div class="col"> <input type="submit" class="btn btn-danger" value="Confirmar"/> </div>
                 </form>
-
             </div>
         </main>
     </body>

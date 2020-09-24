@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head>
-        <script src="captcha.js"> </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
@@ -25,18 +24,18 @@
                     <center class="container">
 
                         <% if (nuevo) { %>
-                        <form id="demo-form" method="POST" action="/save">
+                        <form novalidate id="demo-form" method="POST" action="/save">
                             <% } else { %>
-                            <form id="demo-form" method="POST" action="/login">
+                            <form novalidate id="demo-form" method="POST" action="/login">
                                 <% } %> 
-                                <input value="ondasycircuitos@gmail.com" id="MAIL" autocomplete="off" autocomplete="no" type="email" required="required" name="mail" placeholder="Email" />
+                                <input id="MAIL" autocomplete="off" autocomplete="no" type="email" required="required" name="mail" placeholder="Email" />
                                 <% if (nuevo) { %>
                                 <input id="PASS" autocomplete="off" autocomplete="no" type="password"  required="required" name="password" placeholder="Password" />
                                 <input type="text" required="required" name="nombre" placeholder="Name" />
                                 <input type="text" required="required" name="phone"  maxlength="8" placeholder="Phone" />
                                 <% } else { %>
                                 <input type="password" required="required" name="password" placeholder="Password" />
-                                <input  value="633590" type="text" autocomplete="off" autocomplete="no" required="required" name="code" placeholder="Secret Code" />
+                                <input type="text" autocomplete="off" autocomplete="no" required="required" name="code" placeholder="Secret Code" />
                                 <% } %> 
                                 <input type="submit" value="Ingresar" class="g-recaptcha" data-sitekey="6LePoMwZAAAAAIEbj8CzS5ue4VwvydSz-AE05lpd" data-callback='onSubmit' data-action='submit'></input>
                             </form>
@@ -50,4 +49,5 @@
         </div>
         <p id="showError" style="padding-left:80px; color: red"></p>
     </body>
+    <script src="captcha.js"> </script>
 </html>

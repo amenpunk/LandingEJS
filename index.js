@@ -40,7 +40,7 @@ app.get('/', (req, res) => {
 
     sess = req.session;
     if(sess.loged){
-        return res.render('home', {name : sess.nombre})
+        return res.render('home', {name : sess.nombre, error : { status : false, message : "" }})
     }
 
     return res.render('landingpage', { error : { status : false, message : "" }})
@@ -141,7 +141,7 @@ app.get('/home', (req, res)=> {
     if(!sess.loged){
         return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
     }
-    return res.render('home', { name : sess.nombre })
+    return res.render('home', { name : sess.nombre,  error : { status : false, message : "" } })
 })
 
 app.post('/save', async (req, res) => {
@@ -243,7 +243,7 @@ app.get('/users', async (req, res)=> {
     }
     let permiso = sess.access.split("");
     if(parseInt(permiso[2]) !== 1 ){
-        return res.render('landingpage', {error : { status : true , message : "Tu usuario no puede modificar los permisos :( " }})
+        return res.render('home', {name : sess.nombre, error : { status : true , message : "Tu usuario no puede modificar los permisos :( " }})
     }
     const list = sql.connect(config.db).then( pool => {
         return pool.request()
@@ -298,7 +298,7 @@ app.get('/upload', function(req, res){
     let permiso = sess.access.split("");
     
     if(parseInt(permiso[1]) !== 1 ){
-        return res.render('landingpage', {error : { status : true , message : "Tu usuario no puede subir archivos :(" }})
+        return res.render('home', {name : sess.nombre , error : { status : true , message : "Tu usuario no puede subir archivos :(" }})
     }
 
     return res.render('upload')
@@ -359,7 +359,7 @@ app.get('/files', async (req,res) => {
     let permiso = sess.access.split("");
 
     if(parseInt(permiso[0]) !== 1 ){
-        return res.render('landingpage', {error : { status : true , message : "Tu usuario no puede ver los archivos :(" }})
+        return res.render('home', {name : sess.nombre , error : { status : true , message : "Tu usuario no puede ver los archivos :(" }})
     }
 
     const list = sql.connect(config.db).then( pool => {

@@ -1,5 +1,5 @@
 //const MaxTime = 60000
-const MaxTime = 9000000000000
+const MaxTime = 60000*24
 const multer = require('multer'); 
 module.exports.config = {
 
