@@ -215,11 +215,11 @@ app.post('/verify', async (req,res) =>{
             response: token
         }
     });
-    console.log(result.data)
     const {success } = result.data
+    console.log("google response:", result.data)
 
     if(!success) {
-        return res.status(200).json({
+        return res.status(400).json({
             status : 0,
             title :  "Error",
             message : "Invalid recaptcha",

@@ -3,12 +3,20 @@ const myForm = document.getElementById("demo-form")
 function onSubmit(token) {
 
     if( myForm.mail.value == "" ) {
-        alert( "Porfavor ingresa tu email!!" );
+        swal({
+            title: "Ups",
+            text: "Porfavor ingresa tu email!!",
+            icon: "error",
+        });
         myForm.mail.focus() ;
         return false;
     }
     if( myForm.password.value == "" ) {
-        alert( "Porfavor ingresa alguna password!!" );
+        swal({
+            title: "Ups",
+            text: "Porfavor ingresa alguna password!!",
+            icon: "error",
+        });
         myForm.password.focus() ;
         return false;
     }
@@ -21,19 +29,32 @@ function onSubmit(token) {
         const regex = new RegExp("(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
         const match = regex.test(pass.value)
         if(!match){
-            return document.getElementById("showError").innerHTML = "Password invalida, debe contener: </br> 1 letra minuscula, 1 letra mayuscula, un caracter especial '@,#,$' y debe ser mayor o igual a 8"
+            //return document.getElementById("showError").innerHTML = "Password invalida, debe contener: </br> 1 letra minuscula, 1 letra mayuscula, un caracter especial '@,#,$' y debe ser mayor o igual a 8"
+            return swal({
+                title: "Password invalida!!",
+                text: "debe contener: 1 letra minuscula, 1 letra mayuscula, un caracter especial '@,#,$' y debe ser mayor o igual a 8",
+                icon: "error",
+            });
         }else{
             document.getElementById("showError").innerHTML = "";
         }
     }
     
     if( myForm.nombre && myForm.nombre.value == "" ) {
-        alert( "Porfavor ingresa alguna nombre!!" );
+        swal({
+            title: "Ups!!",
+            text: "Porfavor ingresa alguna nombre!!",
+            icon: "error",
+        });
         myForm.nombre.focus() ;
         return false;
     }
     if( myForm.phone && myForm.phone.value == ""  && myForm.phone.length != 8) {
-        alert( "Porfavor ingresa alguna telefono valido!!" );
+        swal({
+            title: "Ups!!",
+            text: "Porfavor ingresa alguna telefono valido!!",
+            icon: "error",
+        });
         myForm.phone.focus() ;
         return false;
     }
@@ -54,8 +75,14 @@ function onSubmit(token) {
         .then(result => {
             const {status, message} = result
             console.log(status, message)
-            if(result){
+            if(status){
                 myForm.submit();
+            }else{
+                swal({
+                    title: "Ups!!",
+                    text: "Captcha invalid",
+                    icon: "error",
+                });
             }
         })
         .catch(error => console.error(error) );
