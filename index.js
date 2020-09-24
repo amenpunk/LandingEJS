@@ -208,13 +208,7 @@ app.post('/logout', (req,res) => {
 app.post('/verify', async (req,res) =>{
 
     const {token , value } = req.body;
-
-    var result = await axios.post("https://www.google.com/recaptcha/api/siteverify", {}, {
-        params: {
-            secret: process.env.CAPTCHA_SECRET,
-            response: token
-        }
-    });
+    var result = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CAPTCHA_SECRET}&response=${token}`)
     const {success } = result.data
     console.log("google response:", result.data)
 
