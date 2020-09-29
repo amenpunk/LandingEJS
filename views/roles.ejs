@@ -1,68 +1,58 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <link rel="stylesheet" href="estilos.css">
-        <title>Landing Page</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    </head>
-    <body>
-        <header>
-            <div class="container">
-                <center>
-                    <h1 class="treinta">Lista de usuarios</h1>
-                </center>
-            </div>
-        </header>
-        <div class="wave">
-            <div style="height: 150px; overflow: hidden;" ><svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #fff;"></path></svg></div>
-        </div>
-        <main>
+<%- include('header'); -%>
+<main>
+    <header>
+        <div class="container">
             <center>
-                <table class="tg">
-                    <thead>
-                        <tr>
-                            <th class="tg-0pky"> <center>ID</center> </th>
-                            <th class="tg-0pky"> <center>Nombre</center> </th>
-                            <th class="tg-0pky"><center>Email</center></th>
-                            <th class="tg-0pky"> <center> [ Lectura | Escritura | Modificacion ] </center> </th>
-                            <th class="tg-0pky"><center>Operacion</center></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% for(var i=0; i < Users.length; i++) {
-                                let gg = Users[i].access_code.toString().split('');
-                                let id = Users[i].id.shift()
-                                let [lec, esc, mod] = gg %>
-                                <tr>
-                            <td><%= Users[i].id %></td>
-                            <td><%= Users[i].nombre %></td>
-                            <td><%= Users[i].email %></td>
-                               <td> 
-                                <center>
-                                    <% if(lec === '1') {  %> <input id="lec-<%=id%>" type="checkbox" checked> <% } else { %>
-                                    <input name="role_one" id="lec-<%=id%>" type="checkbox">
-                                    <% } %> 
-                                    
-                                    <% if(esc === '1') {  %> <input id="esc-<%=id%>" type="checkbox" checked> <% } else { %>
-                                    <input name="role_one" id="esc-<%=id%>" type="checkbox">
-                                    <% } %> 
-                                    
-                                    <% if(mod === '1') {  %> <input id="mod-<%=id%>" type="checkbox" checked> <% } else { %>
-                                    <input name="role_one" id="mod-<%=id%>" type="checkbox">
-                                    <% } %> 
-                                </center>
-                               </td>
-                               <td><button onclick="Actualizar(<%=id%>)" class="btn btn-success"><center>Actualizar</center></button></td>
-                        </tr>
-                            <% } %>
-                    </tbody>
-                </table>
+                <h1 class="treinta">Lista de usuarios</h1>
             </center>
-        </main>
-    </body>
-    <script src="captcha.js"> </script>
-</html>
+        </div>
+    </header>
+    <div class="wave">
+        <div style="height: 150px; overflow: hidden;" ><svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #fff;"></path></svg></div>
+    </div>
+    <main>
+        <center>
+            <table class="tg">
+                <thead>
+                    <tr>
+                        <th class="tg-0pky"> <center>ID</center> </th>
+                        <th class="tg-0pky"> <center>Nombre</center> </th>
+                        <th class="tg-0pky"><center>Email</center></th>
+                        <th class="tg-0pky"> <center> [ Lectura | Escritura | Modificacion ] </center> </th>
+                        <th class="tg-0pky"><center>Operacion</center></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < Users.length; i++) {
+                            let gg = Users[i].access_code.toString().split('');
+                            let id = Users[i].id.shift()
+                            let [lec, esc, mod] = gg %>
+                            <tr>
+                                <td><%= Users[i].id %></td>
+                                <td><%= Users[i].nombre %></td>
+                                <td><%= Users[i].email %></td>
+                                <td> 
+                                    <center>
+                                        <% if(lec === '1') {  %> <input id="lec-<%=id%>" type="checkbox" checked> <% } else { %>
+                                        <input name="role_one" id="lec-<%=id%>" type="checkbox">
+                                        <% } %> 
+
+                                        <% if(esc === '1') {  %> <input id="esc-<%=id%>" type="checkbox" checked> <% } else { %>
+                                        <input name="role_one" id="esc-<%=id%>" type="checkbox">
+                                        <% } %> 
+
+                                        <% if(mod === '1') {  %> <input id="mod-<%=id%>" type="checkbox" checked> <% } else { %>
+                                        <input name="role_one" id="mod-<%=id%>" type="checkbox">
+                                        <% } %> 
+                                    </center>
+                                </td>
+                                <td><button onclick="Actualizar(<%=id%>)" class="btn btn-success"><center>Actualizar</center></button></td>
+                            </tr>
+                            <% } %>
+                </tbody>
+            </table>
+        </center>
+    </main>
+</main>
+<script src="captcha.js"> </script>
+<%- include('footer'); -%>

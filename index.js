@@ -16,6 +16,9 @@ const mime = require('mime');
 const fs = require('fs');
 const multer = require('multer');
 const upload = multer({ storage: config.storage })
+const { User } = require("./Models/User")
+const { Role } = require("./Models/Role")
+const { Log } = require("./Models/Log")
 
 var transporter = nodemailer.createTransport({
  service: 'gmail',
@@ -82,34 +85,16 @@ app.post('/login', async (req, res) => {
 
     const { mail, password, code } = req.body
     sess=req.session;
-    console.log(sess)
     
-    const black = await sql.connect(config.db).then( pool => {
-        return pool.request()
-            .input('mail', sql.TYPES.VarChar, mail)
-            .query('select * from blacklist where mail = @mail')
-    }).catch(e => {
-        console.log(e)
-        return false
-    })
+    const black = await User.isInBlackList(mail)
     
     const {recordset : list} = black
     if(list.length > 0){
         return res.render('landingpage', {error : { status : true, message : `Este correo esta en la lista negra` }})
     }
 
-    const result = await sql.connect(config.db).then( pool => {
-        return pool.request()
-            .input('input_parameter', sql.TYPES.VarChar, mail)
-            .query('select * from login l inner join role r on l.id = r.id where email=@input_parameter')
-            //.query('select * from login where email = @input_parameter')
-    }).catch(e => {
-        console.log(e)
-        return false
-    })
-    
+    const result = await User.verifyCredentials(mail)
     const {recordset} = result
-    console.log("recordset", recordset)
     if(recordset.length <= 0){
         //sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
         //return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo, intentos restante ${3 - sess.try.num}` }})
@@ -134,6 +119,7 @@ app.post('/login', async (req, res) => {
     sess.id_user = id[0]
     sess.access = access_code
     return res.redirect('home')
+
 })
 
 app.get('/home', (req, res)=> {
@@ -146,28 +132,15 @@ app.get('/home', (req, res)=> {
 
 app.post('/save', async (req, res) => {
     
-    console.log(req.body)
     sess=req.session;
-    const { mail, password, nombre, phone } = req.body
-    console.log( mail, password, nombre, phone )
-    
+    let { mail: email , password , nombre, phone } = req.body
     const max = 999999
     const min = 100000
-    const random = (Math.random() * (max - min) + min).toFixed(0)
-
-    const pass = Buffer.from(password).toString('base64')
-    const result = await sql.connect(config.db).then( pool => {
-           return pool.request()
-            .input('nombre', sql.TYPES.VarChar, nombre)
-            .input('mail', sql.TYPES.VarChar, mail)
-            .input('pass', sql.TYPES.VarChar, pass)
-            .input('phone', sql.TYPES.VarChar, phone)
-            .input('code', sql.TYPES.VarChar, random)
-            .query('insert into login(nombre, email, pass, phone, code) values(@nombre, @mail, @pass, @phone, @code )')
-        }).catch(e => {
-            console.log(e)
-            return false
-    })
+    const code = (Math.random() * (max - min) + min).toFixed(0)
+    password = Buffer.from(password).toString('base64')
+    
+    const user = new User({ email, password, nombre, phone, code })
+    const result = await user.save();
     
     const mailOptions = {
         from: process.env.GMAIL,
@@ -175,15 +148,14 @@ app.post('/save', async (req, res) => {
         subject: 'Landing Page', 
         html: `<h1>Bienvenido</h1> <br> ingresa con el siguiente codigo: ${random}`
     };
-    
+    /*
     transporter.sendMail(mailOptions, function (err, info) {
         if(err)
             console.log(err)
         else
             console.log(info);
     });
-    
-    /*twilio.messages
+    twilio.messages
         .create({
             body: `Tu codigo de ingreso es ${random}`,
             from: '+12054798880',
@@ -230,7 +202,6 @@ app.post('/verify', async (req,res) =>{
 })
 
 app.get('/users', async (req, res)=> {
-    
     sess = req.session;
     if(!sess.loged){
         return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
@@ -239,31 +210,17 @@ app.get('/users', async (req, res)=> {
     if(parseInt(permiso[2]) !== 1 ){
         return res.render('home', {name : sess.nombre, error : { status : true , message : "Tu usuario no puede modificar los permisos :( " }})
     }
-    const list = sql.connect(config.db).then( pool => {
-        return pool.request()
-            .query('select * from login l inner join role r on l.id = r.id')
-    }).catch(e => {
-        console.log(e)
-        return false
-    })
+    const list = User.getAll(); 
     let Result = await list;
     const {recordset : Users} = Result
     return res.render('roles', { Users })
 })
 
 app.post('/UpdateRol', async (req, res)=> {
-    const {id, access_code} = req.body;
 
-    let up = sql.connect(config.db).then( pool => {
-        return pool.request()
-            .input('id', sql.TYPES.VarChar, id )
-            .input('access_code', sql.TYPES.VarChar, access_code )
-            .query('update role set access_code=(@access_code) where id=(@id)')
-    }).catch(e => {
-        console.log(e)
-        resolve(e)
-    })
-    let result = await up;
+    const {id, access_code} = req.body;
+    const role = new Role({id, access_code})
+    let result = await role.update();
     let {rowsAffected} = result
     let aff = parseInt(rowsAffected.shift()) > 0
     if(aff){
@@ -305,18 +262,10 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
         if (!file) {
             return res.send(`<div style="font-size:30px"><center><h1>El archivo ingresado no es valido </h1><script> setTimeout(function(){ window.location.href = '/upload'; },3000); </script> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>`);
         }
-        const logger = await sql.connect(config.db).then( pool => {
-            return pool.request()
-                .input('event', sql.TYPES.VarChar, "UPLOAD")
-                .input('usuario', sql.TYPES.Int, sess.id_user )
-                .input('file_name', sql.TYPES.VarChar, file.originalname )
-                .input('file_type', sql.TYPES.VarChar, file.mimetype )
-                .query('insert into file_logs(mark, event, usuario, file_name, file_type) values(GETDATE(),@event, @usuario, @file_name, @file_type  )')
-        }).catch(e => {
-            console.log(e)
-            return false
-        })
+        const log =  new Log({ event : "UPLOAD", usuario : sess.id_user, file_name : file.originalname, file_type : file.mimetype  })
+        const logger = await log.save();
         return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se ha subido!!!!</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://i0.pngocean.com/files/873/563/814/computer-icons-icon-design-business-success.jpg"/> </center></div>`);
+
     }catch(e){
         res.redirect('/', {error: e.message})
     }
@@ -356,15 +305,8 @@ app.get('/files', async (req,res) => {
         return res.render('home', {name : sess.nombre , error : { status : true , message : "Tu usuario no puede ver los archivos :(" }})
     }
 
-    const list = sql.connect(config.db).then( pool => {
-        return pool.request()
-            .query('select * from file_logs')
-    }).catch(e => {
-        console.log(e)
-        return false
-    })
-    let Result = await list;
-    const {recordset : Files} = Result
+    const list = await Log.getAll();
+    const {recordset : Files} = list
     return res.render('files', { Files })
 })
 
