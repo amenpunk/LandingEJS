@@ -16,6 +16,7 @@ const fs = require('fs');
 const multer = require('multer');
 const upload = multer({ storage: config.storage })
 const { User, Role, Log } = require("./Models")
+const GPG = require("gpg")
 
 var transporter = nodemailer.createTransport({
  service: 'gmail',
@@ -97,7 +98,7 @@ app.post('/login', async (req, res) => {
         //return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo, intentos restante ${3 - sess.try.num}` }})
         return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo` }})
     }
-    const {pass,nombre, code : secret, id, access_code } = recordset.shift()
+    const {pass,nombre, code : secret, id, access_code, GPG } = recordset.shift()
     const correctLogin = pass === Buffer.from(password).toString('base64')
 
     if(!correctLogin){
@@ -115,6 +116,7 @@ app.post('/login', async (req, res) => {
     sess.nombre = nombre;
     sess.id_user = id[0]
     sess.access = access_code
+    sess.finger = GPG;
     return res.redirect('home')
 
 })
@@ -145,7 +147,8 @@ app.post('/save', async (req, res) => {
     
     user.ruta = write.file
     const firma = await user.generateGPG();
-    user.GPG = firma
+    const finger = await User.getFingerprint(firma);
+    user.GPG = finger
     user.password = Buffer.from(password).toString('base64')
     const result = await user.save();
     
@@ -247,7 +250,7 @@ app.post('/UpdateRol', async (req, res)=> {
     }
 })
 
-app.get('/upload', function(req, res){
+app.get('/upload', async function(req, res){
     sess = req.session;
     if(!sess.loged){
         return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
@@ -257,8 +260,10 @@ app.get('/upload', function(req, res){
     if(parseInt(permiso[1]) !== 1 ){
         return res.render('home', {name : sess.nombre , error : { status : true , message : "Tu usuario no puede subir archivos :(" }})
     }
+    let userlist = await User.getAll();
+    const {recordset : usuarios} = userlist;
 
-    return res.render('upload')
+    return res.render('upload', {usuarios})
 })
 
 app.post('/upload', upload.single('myFile'), async (req, res) => {
@@ -267,16 +272,30 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
         sess = req.session;
         const id = Buffer.from(file.originalname).toString('base64')
         sess.file = id;
+
+        console.log(req.body)
+        const buffe_file = new Promise((resolve, _r) => {
+            fs.readFile( file.path, function(err, file) { 
+                if(err){
+                    console.log(err)
+                    return resolve(err)
+                } 
+                return resolve(file)
+            })
+        })
+        const buffer = await Promise.resolve(buffe_file)
+
         if (!file) {
             return res.send(`<div style="font-size:30px"><center><h1>El archivo ingresado no es valido </h1><script> setTimeout(function(){ window.location.href = '/upload'; },3000); </script> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>`);
-
         }
+
         const log =  new Log({ event : "UPLOAD", usuario : sess.id_user, file_name : file.originalname, file_type : file.mimetype, name : id })
         const logger = await log.save();
         return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se ha subido!!!!</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://i0.pngocean.com/files/873/563/814/computer-icons-icon-design-business-success.jpg"/> </center></div>`);
 
     }catch(e){
-        res.redirect('/', {error: e.message})
+        console.log("error al subir el archivo:", e.message)
+        return res.redirect('/', {error: e.message})
     }
 })
 
@@ -295,7 +314,9 @@ app.get('/download/:id', function(req, res){
 });
 
 app.get('/files', async (req,res) => {
+    
     sess = req.session;
+    
     if(!sess.loged){
         return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
     }
@@ -306,9 +327,58 @@ app.get('/files', async (req,res) => {
     }
 
     const list = await Log.getAll();
-    console.log(list)
     const {recordset : Files} = list
     return res.render('files', { Files })
+})
+
+app.post('/test', async (req,res) => {
+
+    let userlist = await User.getAll();
+    const {recordset : usuarios} = userlist;
+    let mingKey = "BA020F5FB37B8EF0";
+    let builKey = "63A86E89978C1715";
+    var args = [
+        '--default-key', mingKey,
+        '--recipient', builKey, 
+        '--armor',
+        '--trust-model', 'always', 
+    ];
+
+    fs.readFile('/home/cyberpunk/Documents/UMG-20202/Landing/FILES/ORIGINAL/gg.png', function(err, file) { 
+        if(err) console.log(err)
+        GPG.encrypt(file, args, function(err, encrypted){
+            if(err) return res.send({status : err})
+            fs.writeFile('/home/cyberpunk/Documents/UMG-20202/Landing/FILES/ENCRIPTED/gg.png',encrypted , (err) => {
+                if (err) return res.send({status : false})
+                console.log('archivo encriptado');
+                // success case, the file was saved
+                return res.send({status : true})
+            });
+        });
+
+
+    })
+    //return res.end()
+
+
+    /*
+    fs.readFile(path.join(__dirname, 'firma.key'), function(err, file) {
+        GPG.importKey(file, function(importErr, result, fingerprint) {
+            if(importErr) console.log(importErr)
+            console.log("fingerprint",fingerprint)
+            console.log("result",result)
+            return res.sendFile(path.join(__dirname , 'firma.key'))
+
+        });
+        gpg.importKey(file, function(importErr, result, fingerprint) {
+            assert.ifError(importErr);
+            assert.ok(/secret keys read: 1/.test(result));
+            assert.ok(/key 6F20F59D:/.test(result));
+            assert.ok(fingerprint === '6F20F59D');
+            done();
+        });
+    });
+    */
 })
 
 app.use(function(req,res){

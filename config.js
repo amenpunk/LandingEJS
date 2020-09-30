@@ -16,8 +16,7 @@ module.exports.config = {
             cb(null, 'FILES')
         },
         filename: function (req, file, cb) {
-            console.log(req.session)
-            cb(null, Buffer.from(file.originalname).toString('base64'))
+            cb(null, file.originalname)
         }
     }),
     db : () =>  {

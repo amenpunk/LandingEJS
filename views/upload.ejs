@@ -6,6 +6,13 @@
         <div class="row">
             <form action="/upload" enctype="multipart/form-data" method="POST"> 
                 <div class="col"> <input type="file" class="btn btn-outline-primary" name="myFile" /></div> </br>
+                <div class="col"><center><h4 class="h4">Firmar parar:</h4></center></div> </br>
+                <div class="col">
+                    <select class="form-control">
+                        <% for(var i=0; i < usuarios.length; i++) { %>
+                            <option id="fingerpring" name="fingerprint" value="<%= usuarios[i].GPG %>"> <%= usuarios[i].nombre %> </option>
+                        <% } %>
+                    </select> </div> 
                 <div class="col"> <input type="submit" class="btn btn-danger" value="Confirmar"/> </div>
             </form>
         </div>

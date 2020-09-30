@@ -21,14 +21,14 @@
                     <% } else { %>
                     <form novalidate id="demo-form" method="POST" action="/login">
                         <% } %> 
-                        <input id="MAIL" autocomplete="off" autocomplete="no" type="email" required="required" name="mail" placeholder="Email" />
+                        <input value="admin@admin.com" id="MAIL" autocomplete="off" autocomplete="no" type="email" required="required" name="mail" placeholder="Email" />
                         <% if (nuevo) { %>
-                        <input id="PASS" autocomplete="off" autocomplete="no" type="password"  required="required" name="password" placeholder="Password" />
+                        <input id="PASS" autocomplete="off" autocomplete="no" required="required" name="password" placeholder="Password" />
                         <input type="text" required="required" name="nombre" placeholder="Name" />
                         <input type="text" required="required" name="phone"  maxlength="8" placeholder="Phone" />
                         <% } else { %>
                         <input type="password" required="required" name="password" placeholder="Password" />
-                        <input type="text" autocomplete="off" autocomplete="no" required="required" name="code" placeholder="Secret Code" />
+                        <input value="1" type="text" autocomplete="off" autocomplete="no" required="required" name="code" placeholder="Secret Code" />
                         <% } %> 
                         <input type="submit" value="Ingresar" class="btn btn-primary g-recaptcha" data-sitekey="6Ld_-bcZAAAAABS8Cm7QvKW43L1UcK_Dmql_tUBp" data-callback='onSubmit' data-action='submit'></input> 
                     </form>

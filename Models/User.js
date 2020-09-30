@@ -4,6 +4,7 @@ const { config } = require("../config")
 const fs = require("fs")
 const path = require('path');
 const { exec } = require("child_process")
+const GPG = require("gpg")
 
 class User {
     constructor(user){
@@ -123,6 +124,13 @@ class User {
                     return res(key)
                 })
             })
+        })
+    }
+    static getFingerprint(gpgKey){
+        return new Promise((resolve,_r) => {
+            GPG.importKey(gpgKey, function(importErr, result, fingerprint) {
+                return resolve(fingerprint)
+            });
         })
     }
 }
