@@ -1,6 +1,9 @@
 'use strict'
 const sql = require('mssql')
 const { config } = require("../config")
+const fs = require("fs")
+const path = require('path');
+const { exec } = require("child_process")
 
 class User {
     constructor(user){
@@ -9,6 +12,8 @@ class User {
         this.password = user.password;
         this.phone = user.phone;
         this.code = user.code;
+        this.ruta = user.ruta;
+        this.GPG = user.GPG
     }
     print(){
         console.log(this)
@@ -22,7 +27,8 @@ class User {
                     .input('pass', sql.TYPES.VarChar, this.password)
                     .input('phone', sql.TYPES.VarChar, this.phone)
                     .input('code', sql.TYPES.VarChar, this.code)
-                    .query('insert into login(nombre, email, pass, phone, code) values(@nombre, @mail, @pass, @phone, @code )')
+                    .input('GPG', sql.TYPES.Text, this.GPG)
+                    .query('insert into login(nombre, email, pass, phone, code, GPG) values(@nombre, @mail, @pass, @phone, @code, @GPG )')
                     .then( data => {
                         return res(data)
                     })
@@ -80,6 +86,44 @@ class User {
             })
         })
 
+    }
+    fileScript(){
+        return new Promise((resolve,_rect) => {
+            const script = "Key-Type: 1 \n" +
+                "Key-Length: 2048 \n" +
+                "Subkey-Type: 1 \n" +
+                "Subkey-Length: 2048 \n"+
+                "Name-Real: " + this.nombre + "\n" +
+                "Name-Email: " + this.email + "\n" + 
+                "Expire-Date: 0\n" +
+                "Passphrase: " + this.password;
+            
+            const rute =  `/tmp/${this.code}_get_key`
+            fs.writeFile(rute, script , (err) => {
+                if(err){
+                    resolve({status : false}) 
+                }
+                resolve({status : true, file : rute})
+            }) 
+        })
+    }
+    generateGPG(){
+        console.log("archivo",this.ruta)
+        return new Promise((res,_rej) => {
+            const file = exec(`gpg --gen-key --batch ${this.ruta}`, (err, stdout, stderr) => {
+                if(err){
+                    console.error(stderr)
+                    return res(stderr)
+                }
+                exec(`gpg --armor --export ${this.email}`,(err, key, exception) => {
+                    if(err){
+                        console.error(exception)
+                        return res(exception)
+                    }
+                    return res(key)
+                })
+            })
+        })
     }
 }
 

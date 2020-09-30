@@ -4,7 +4,6 @@ const PORT = process.env.PORT || 8080;
 const dotenv = require('dotenv');
 dotenv.config();
 const bodyParser = require('body-parser');
-const sql = require('mssql')
 const session = require('express-session');
 const { config } = require("./config")
 const cors = require('cors')
@@ -16,9 +15,7 @@ const mime = require('mime');
 const fs = require('fs');
 const multer = require('multer');
 const upload = multer({ storage: config.storage })
-const { User } = require("./Models/User")
-const { Role } = require("./Models/Role")
-const { Log } = require("./Models/Log")
+const { User, Role, Log } = require("./Models")
 
 var transporter = nodemailer.createTransport({
  service: 'gmail',
@@ -38,7 +35,7 @@ app.use(expres.static('public'));
 
 
 app.listen(PORT, () =>  console.log('APP listen in port', PORT) )
- 
+
 app.get('/', (req, res) => {
 
     sess = req.session;
@@ -137,16 +134,26 @@ app.post('/save', async (req, res) => {
     const max = 999999
     const min = 100000
     const code = (Math.random() * (max - min) + min).toFixed(0)
-    password = Buffer.from(password).toString('base64')
+
     
     const user = new User({ email, password, nombre, phone, code })
+    const write = await user.fileScript();
+    
+    if(!write.status){ 
+        return res.render("loginForm", {nuevo : true})
+    }
+    
+    user.ruta = write.file
+    const firma = await user.generateGPG();
+    user.GPG = firma
+    user.password = Buffer.from(password).toString('base64')
     const result = await user.save();
     
     const mailOptions = {
         from: process.env.GMAIL,
-        to: mail,
+        to: email,
         subject: 'Landing Page', 
-        html: `<h1>Bienvenido</h1> <br> ingresa con el siguiente codigo: ${random}`
+        html: `<h1>Bienvenido</h1> <br> ingresa con el siguiente codigo: ${code}`
     };
     /*
     transporter.sendMail(mailOptions, function (err, info) {
@@ -182,7 +189,6 @@ app.post('/verify', async (req,res) =>{
     const {token , value } = req.body;
     var result = await axios.post(`https://www.google.com/recaptcha/api/siteverify?secret=${process.env.CAPTCHA_SECRET}&response=${token}`)
     const {success } = result.data
-    console.log("google response:", result.data)
 
     if(!success) {
         return res.status(400).json({
@@ -259,10 +265,13 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
     try{
         const file = req.file
         sess = req.session;
+        const id = Buffer.from(file.originalname).toString('base64')
+        sess.file = id;
         if (!file) {
             return res.send(`<div style="font-size:30px"><center><h1>El archivo ingresado no es valido </h1><script> setTimeout(function(){ window.location.href = '/upload'; },3000); </script> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>`);
+
         }
-        const log =  new Log({ event : "UPLOAD", usuario : sess.id_user, file_name : file.originalname, file_type : file.mimetype  })
+        const log =  new Log({ event : "UPLOAD", usuario : sess.id_user, file_name : file.originalname, file_type : file.mimetype, name : id })
         const logger = await log.save();
         return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se ha subido!!!!</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://i0.pngocean.com/files/873/563/814/computer-icons-icon-design-business-success.jpg"/> </center></div>`);
 
@@ -281,17 +290,8 @@ app.get('/download/:id', function(req, res){
     res.setHeader('Content-type', mimetype);
     var filestream = fs.createReadStream(file);
     filestream.pipe(res);
-        
-    const logger = sql.connect(config.db).then( pool => {
-        return pool.request()
-            .input('event', sql.TYPES.VarChar, "DOWNLOAD")
-            .input('usuario', sql.TYPES.Int, sess.id_user )
-            .input('file_name', sql.TYPES.VarChar, name )
-            .query('insert into file_logs(mark, event, usuario, file_name) values(GETDATE(),@event, @usuario, @file_name  )')
-    }).catch(e => {
-        console.log(e)
-        return false
-    })
+    const log =  new Log({ event : "DOWNLOAD", usuario : sess.id_user, file_name : name, file_type : "" })
+    log.save();
 });
 
 app.get('/files', async (req,res) => {
@@ -306,6 +306,7 @@ app.get('/files', async (req,res) => {
     }
 
     const list = await Log.getAll();
+    console.log(list)
     const {recordset : Files} = list
     return res.render('files', { Files })
 })

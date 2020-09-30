@@ -6,6 +6,7 @@ create table login(
     pass varchar(250),
     phone varchar(250),
     code varchar(250),
+    GPG TEXT,
     CONSTRAINT pk_ad PRIMARY KEY(id)
 )
 
@@ -27,6 +28,7 @@ create table file_logs(
     usuario int,
     file_name varchar(250),
     file_type varchar(250),
+    name varchar(250),
     CONSTRAINT fk_file FOREIGN KEY(usuario) REFERENCES login(id)
 )
 
