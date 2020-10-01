@@ -13,10 +13,11 @@ module.exports.config = {
     },
     storage : multer.diskStorage({
         destination: function (req, file, cb) {
-            cb(null, 'FILES')
+            cb(null, 'FILES/ORIGINAL')
         },
         filename: function (req, file, cb) {
-            cb(null, file.originalname)
+            const id = file.originalname.replace(/\s/g,'')
+            cb(null, id)
         }
     }),
     db : () =>  {

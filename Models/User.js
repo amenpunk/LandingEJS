@@ -109,7 +109,6 @@ class User {
         })
     }
     generateGPG(){
-        console.log("archivo",this.ruta)
         return new Promise((res,_rej) => {
             const file = exec(`gpg --gen-key --batch ${this.ruta}`, (err, stdout, stderr) => {
                 if(err){

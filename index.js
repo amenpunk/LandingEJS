@@ -15,7 +15,7 @@ const mime = require('mime');
 const fs = require('fs');
 const multer = require('multer');
 const upload = multer({ storage: config.storage })
-const { User, Role, Log } = require("./Models")
+const { User, Role, Log, File } = require("./Models")
 const GPG = require("gpg")
 
 var transporter = nodemailer.createTransport({
@@ -29,8 +29,9 @@ var transporter = nodemailer.createTransport({
 app.use(cors())
 app.use(session(config.session));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 
-app.use(expres.urlencoded({ extended: true }))
+
 app.set('view engine', 'ejs')
 app.use(expres.static('public'));
 
@@ -269,13 +270,16 @@ app.get('/upload', async function(req, res){
 app.post('/upload', upload.single('myFile'), async (req, res) => {
     try{
         const file = req.file
+        const { GPG : TO } = req.body
+        console.log("Author:", sess.finger)
+        console.log("singed to:", TO )
+        
         sess = req.session;
-        const id = Buffer.from(file.originalname).toString('base64')
+        const id = file.originalname.replace(/\s/g,'')
         sess.file = id;
-
-        console.log(req.body)
+        
         const buffe_file = new Promise((resolve, _r) => {
-            fs.readFile( file.path, function(err, file) { 
+            fs.readFile( 'FILES/ORIGINAL/'+ id , function(err, file) { 
                 if(err){
                     console.log(err)
                     return resolve(err)
@@ -283,14 +287,38 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
                 return resolve(file)
             })
         })
+        
         const buffer = await Promise.resolve(buffe_file)
+        var args = [
+            '--default-key', sess.finger,
+            '--recipient', TO,
+            '--armor',
+            '--trust-model', 'always', 
+        ];
+        
+        const save = new Promise((resolve, reject) => {
+            GPG.encrypt(buffer, args, function(err, encrypted){
+                if(err) return res.send({status : err})
+                fs.writeFile( process.env.SECRET_DIR + id , encrypted , (err) => {
+                    if (err) return resolve({status : false})
+                    console.log('archivo encriptado');
+                    return resolve({status : true})
+                });
+            });
+        })
+
+        const encryptFile = await Promise.resolve(save)
 
         if (!file) {
             return res.send(`<div style="font-size:30px"><center><h1>El archivo ingresado no es valido </h1><script> setTimeout(function(){ window.location.href = '/upload'; },3000); </script> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>`);
         }
 
-        const log =  new Log({ event : "UPLOAD", usuario : sess.id_user, file_name : file.originalname, file_type : file.mimetype, name : id })
-        const logger = await log.save();
+        const log = new Log({ event : "UPLOAD", usuario : sess.id_user, file_name : id , file_type : file.mimetype, name : file.originalname })
+        const file_save = new File({ origin : sess.finger, destiny : TO, name : file.originalname, type : file.mimetype, original_name : id })
+        file_save.print();
+       
+        Promise.all([ log.save(), file_save.save() ])
+        
         return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se ha subido!!!!</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://i0.pngocean.com/files/873/563/814/computer-icons-icon-design-business-success.jpg"/> </center></div>`);
 
     }catch(e){
@@ -302,7 +330,7 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
 app.get('/download/:id', function(req, res){
     const name = req.params.id
     sess = req.session;
-    var file = __dirname + `/FILES/${name}`;
+    var file = __dirname + `/FILES/ENCRIPTED/${name}`;
     var filename = path.basename(file);
     var mimetype = mime.lookup(file);
     res.setHeader('Content-disposition', 'attachment; filename=' + filename);
@@ -326,59 +354,10 @@ app.get('/files', async (req,res) => {
         return res.render('home', {name : sess.nombre , error : { status : true , message : "Tu usuario no puede ver los archivos :(" }})
     }
 
-    const list = await Log.getAll();
+    const list = await File.getAll(sess.finger);
     const {recordset : Files} = list
+    console.log(Files)
     return res.render('files', { Files })
-})
-
-app.post('/test', async (req,res) => {
-
-    let userlist = await User.getAll();
-    const {recordset : usuarios} = userlist;
-    let mingKey = "BA020F5FB37B8EF0";
-    let builKey = "63A86E89978C1715";
-    var args = [
-        '--default-key', mingKey,
-        '--recipient', builKey, 
-        '--armor',
-        '--trust-model', 'always', 
-    ];
-
-    fs.readFile('/home/cyberpunk/Documents/UMG-20202/Landing/FILES/ORIGINAL/gg.png', function(err, file) { 
-        if(err) console.log(err)
-        GPG.encrypt(file, args, function(err, encrypted){
-            if(err) return res.send({status : err})
-            fs.writeFile('/home/cyberpunk/Documents/UMG-20202/Landing/FILES/ENCRIPTED/gg.png',encrypted , (err) => {
-                if (err) return res.send({status : false})
-                console.log('archivo encriptado');
-                // success case, the file was saved
-                return res.send({status : true})
-            });
-        });
-
-
-    })
-    //return res.end()
-
-
-    /*
-    fs.readFile(path.join(__dirname, 'firma.key'), function(err, file) {
-        GPG.importKey(file, function(importErr, result, fingerprint) {
-            if(importErr) console.log(importErr)
-            console.log("fingerprint",fingerprint)
-            console.log("result",result)
-            return res.sendFile(path.join(__dirname , 'firma.key'))
-
-        });
-        gpg.importKey(file, function(importErr, result, fingerprint) {
-            assert.ifError(importErr);
-            assert.ok(/secret keys read: 1/.test(result));
-            assert.ok(/key 6F20F59D:/.test(result));
-            assert.ok(fingerprint === '6F20F59D');
-            done();
-        });
-    });
-    */
 })
 
 app.use(function(req,res){

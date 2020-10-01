@@ -1,4 +1,5 @@
 create datbase landing
+
 create table login(
     id int IDENTITY(1,1) not null,
     nombre VARCHAR(250),
@@ -30,6 +31,14 @@ create table file_logs(
     file_type varchar(250),
     name varchar(250),
     CONSTRAINT fk_file FOREIGN KEY(usuario) REFERENCES login(id)
+)
+
+create table files(
+    id_origin varchar(250),
+    id_dest varchar(250),
+    file_name varchar(250),
+    file_type varchar(250),
+    name varchar(250),
 )
 
 create trigger tg_set_role on login after insert 

@@ -4,12 +4,12 @@
 <main>
     <center>
         <table class="table">
-            <thead> <tr> <th class="tg-0pky"> <center>Nombre</center> </th><th><center>Tipo archivo</center></th> <th class="tg-0pky"><center>Operacion</center></th> </tr> </thead> <tbody>
+            <thead> <tr> <th class="docu tg-0pky"> <center>Nombre</center> </th><th class="docu"><center>Tipo archivo</center></th> <th class="tg-0pky docu"><center>Operacion</center></th> </tr> </thead> <tbody>
                 <% for(var i=0; i < Files.length; i++) { %>
-                <tr>
-                    <td> <%= Files[i].file_name %> </td>
-                    <td> <%= Files[i].file_type %> </td>
-                    <td><a href="/download/<%=Files[i].name%>" class="btn btn-success"><center>Descargar</center></button></td>
+                <tr class="docu">
+                    <td class="docu"> <%= Files[i].file_name %> </td>
+                    <td class="docu"> <%= Files[i].file_type %> </td>
+                    <td class="docu"><a href="/download/<%=Files[i].name%>" class="btn btn-success"><center>Descargar</center></button></td>
                 </tr>
                 <% } %>
             </tbody>
