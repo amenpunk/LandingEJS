@@ -14,8 +14,6 @@ class File {
         console.log(this);
     }
     save(){
-        //id_origin id_dest file_name file_type name
-        //id_origin id_dest file_name file_type name
         return new Promise((res,_rej) => {
             return config.db().then( db => {
                 db.request()
@@ -37,12 +35,11 @@ class File {
 
     }
     static getAll(destiny){
-        console.log("fingerprint: ", destiny)
         return new Promise((res,_rej) => {
             return config.db().then( db => {
                 db.request()
                     .input('destiny', sql.TYPES.VarChar, destiny)
-                    .query("select * from files where id_dest=@destiny")
+                    .query("select * from files where id_dest=@destiny or id_origin=@destiny")
                     .then( data => {
                         return res(data)
                     })

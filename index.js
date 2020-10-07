@@ -17,6 +17,8 @@ const multer = require('multer');
 const upload = multer({ storage: config.storage })
 const { User, Role, Log, File } = require("./Models")
 const GPG = require("gpg")
+const Stream = require('stream');
+
 
 var transporter = nodemailer.createTransport({
  service: 'gmail',
@@ -319,7 +321,7 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
        
         Promise.all([ log.save(), file_save.save() ])
         
-        return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se ha subido!!!!</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://i0.pngocean.com/files/873/563/814/computer-icons-icon-design-business-success.jpg"/> </center></div>`);
+        return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se esta subiendo.....</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://tradinglatam.com/wp-content/uploads/2019/04/loading-gif-png-4.gif"/> </center></div>`);
 
     }catch(e){
         console.log("error al subir el archivo:", e.message)
@@ -327,16 +329,35 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
     }
 })
 
-app.get('/download/:id', function(req, res){
-    const name = req.params.id
+app.get('/download/:name/:id_origin/:id_dest', function(req, res){
+    
+    const name = req.params.name
+    const id_origin = req.params.id_origin
+    const id_dest = req.params.id_dest
+
     sess = req.session;
+    
+    const args = [
+        '--decrypt',
+        '--default-key', id_origin,
+        '--recipient', id_dest,
+        '--trust-model', 'always', // so we don't get "no assurance this key belongs to the given user"
+    ];
+
+    
     var file = __dirname + `/FILES/ENCRIPTED/${name}`;
     var filename = path.basename(file);
     var mimetype = mime.lookup(file);
     res.setHeader('Content-disposition', 'attachment; filename=' + filename);
     res.setHeader('Content-type', mimetype);
-    var filestream = fs.createReadStream(file);
-    filestream.pipe(res);
+    
+    var initStream = fs.createReadStream(file);
+    var outStream = new Stream.PassThrough;
+
+    GPG.callStreaming(initStream, outStream, args, (err) => {
+        outStream.pipe(res)
+    })
+
     const log =  new Log({ event : "DOWNLOAD", usuario : sess.id_user, file_name : name, file_type : "" })
     log.save();
 });
@@ -344,6 +365,8 @@ app.get('/download/:id', function(req, res){
 app.get('/files', async (req,res) => {
     
     sess = req.session;
+    console.log("person who go to decript: ", sess )
+
     
     if(!sess.loged){
         return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
@@ -360,7 +383,4 @@ app.get('/files', async (req,res) => {
     return res.render('files', { Files })
 })
 
-app.use(function(req,res){
-    res.status(404).send('<div><center> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>');
-});
 

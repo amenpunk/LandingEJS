@@ -9,7 +9,7 @@
                 <tr class="docu">
                     <td class="docu"> <%= Files[i].file_name %> </td>
                     <td class="docu"> <%= Files[i].file_type %> </td>
-                    <td class="docu"><a href="/download/<%=Files[i].name%>" class="btn btn-success"><center>Descargar</center></button></td>
+                    <td class="docu"><a href="/download/<%=Files[i].name%>/<%=Files[i].id_origin%>/<%=Files[i].id_dest%>" class="btn btn-success"><center>Descargar</center></button></td>
                 </tr>
                 <% } %>
             </tbody>
