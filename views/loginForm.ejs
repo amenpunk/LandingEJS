@@ -1,4 +1,8 @@
-<%- include('header'); -%>
+<link rel="stylesheet" href="estilos.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<link rel="stylesheet" href="estilos.css">
 <div class="wave">
     <div style="height: 150px; overflow: hidden;" ><svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #fff;"></path></svg></div>
 </div>
@@ -14,25 +18,37 @@
                 <h2 class="veinte"> Ingresa tus credenciales</h2>
             </center>
 
-            <center class="container">
 
                 <% if (nuevo) { %>
-                <form novalidate id="demo-form" method="POST" action="http://192.168.0.16/save">
+                <form novalidate id="demo-form" method="POST" action="/save">
+                <div class="form-group">
                     <% } else { %>
                     <form novalidate id="demo-form" method="POST" action="/login">
                         <% } %> 
-                        <input id="MAIL" autocomplete="off" autocomplete="no" type="email" required="required" name="mail" placeholder="Email" />
-                        <% if (nuevo) { %>
-                        <input id="PASS" autocomplete="off" autocomplete="no" required="required" name="password" placeholder="Password" />
-                        <input type="text" required="required" name="nombre" placeholder="Name" />
-                        <input type="text" required="required" name="phone"  maxlength="8" placeholder="Phone" />
+                        <input class="form-control" id="MAIL" autocomplete="off" autocomplete="no" type="email" required="required" name="mail" placeholder="Email" />
+                        <% if  (nuevo) { %>
+                        <input class="form-control" id="PASS" autocomplete="off" autocomplete="no" required="required" name="password" placeholder="Password" />
+                        <input class="form-control" type="text" required="required" name="nombre" placeholder="Name" />
+                        <input class="form-control" type="text" required="required" name="phone"  maxlength="8" placeholder="Phone" />
+                        </br>
+                        </br>
+                        <select id="role" name="role" class="form-control">
+                            <option value="111"> Informatica</option>
+                            <option value="110"> Mercadeo</option>
+                            <option value="100"> Administracion</option>
+                        </select>
                         <% } else { %>
-                        <input type="password" required="required" name="password" placeholder="Password" />
-                        <input type="text" autocomplete="off" autocomplete="no" required="required" name="code" placeholder="Secret Code" />
+
+                        <input class="form-control" type="password" required="required" name="password" placeholder="Password" />
+                        <input class="form-control" type="text" autocomplete="off" autocomplete="no" required="required" name="code" placeholder="Secret Code" />
+
+
                         <% } %> 
-                        <input type="submit" value="Ingresar" class="btn btn-primary g-recaptcha" data-sitekey="6Ld_-bcZAAAAABS8Cm7QvKW43L1UcK_Dmql_tUBp" data-callback='onSubmit' data-action='submit'></input> 
-                    </form>
-            </center>
+                        <center>
+                            <input type="submit" value="Ingresar" class="form-contrl btn btn-primary g-recaptcha" data-sitekey="6Ld_-bcZAAAAABS8Cm7QvKW43L1UcK_Dmql_tUBp" data-callback='onSubmit' data-action='submit'></input> 
+                        </center>
+                <div>
+                </form>
 
         </div>
     </div>

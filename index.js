@@ -135,13 +135,13 @@ app.get('/home', (req, res)=> {
 app.post('/save', async (req, res) => {
     
     sess=req.session;
-    let { mail: email , password , nombre, phone } = req.body
+    let { mail: email , password , nombre, phone, role } = req.body
     const max = 999999
     const min = 100000
     const code = (Math.random() * (max - min) + min).toFixed(0)
 
     
-    const user = new User({ email, password, nombre, phone, code })
+    const user = new User({ email, password, nombre, phone, code, role })
     const write = await user.fileScript();
     
     if(!write.status){ 
@@ -154,6 +154,8 @@ app.post('/save', async (req, res) => {
     user.GPG = finger
     user.password = Buffer.from(password).toString('base64')
     const result = await user.save();
+    const setRole = await user.setRole()
+    console.log("set role result:", setRole)
     
     const mailOptions = {
         from: process.env.GMAIL,
@@ -181,7 +183,7 @@ app.post('/save', async (req, res) => {
     return res.redirect('login');
 })
 
-app.post('/logout', (req,res) => {
+app.get('/logout', (req,res) => {
     req.session.destroy((err) => {
         if(err) {
             return console.log(err);
@@ -305,11 +307,12 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
                     if (err) return resolve({status : false})
                     console.log('archivo encriptado');
                     return resolve({status : true})
-                });
+                })
             });
         })
 
         const encryptFile = await Promise.resolve(save)
+        await fs.unlinkSync('FILES/ORIGINAL/'+ id)
 
         if (!file) {
             return res.send(`<div style="font-size:30px"><center><h1>El archivo ingresado no es valido </h1><script> setTimeout(function(){ window.location.href = '/upload'; },3000); </script> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>`);
@@ -335,6 +338,7 @@ app.get('/download/:name/:id_origin/:id_dest', function(req, res){
     const id_origin = req.params.id_origin
     const id_dest = req.params.id_dest
 
+    console.log({id_dest,id_origin})
     sess = req.session;
     
     const args = [
@@ -343,7 +347,6 @@ app.get('/download/:name/:id_origin/:id_dest', function(req, res){
         '--recipient', id_dest,
         '--trust-model', 'always', // so we don't get "no assurance this key belongs to the given user"
     ];
-
     
     var file = __dirname + `/FILES/ENCRIPTED/${name}`;
     var filename = path.basename(file);

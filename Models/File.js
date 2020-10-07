@@ -39,7 +39,8 @@ class File {
             return config.db().then( db => {
                 db.request()
                     .input('destiny', sql.TYPES.VarChar, destiny)
-                    .query("select * from files where id_dest=@destiny or id_origin=@destiny")
+                    .query("select * from files")
+                    //.query("select * from files where id_dest=@destiny or id_origin=@destiny")
                     .then( data => {
                         return res(data)
                     })

@@ -15,6 +15,7 @@ class User {
         this.code = user.code;
         this.ruta = user.ruta;
         this.GPG = user.GPG
+        this.role = user.role
     }
     print(){
         console.log(this)
@@ -131,6 +132,23 @@ class User {
                 return resolve(fingerprint)
             });
         })
+    }
+    setRole(){
+        return new Promise((res,_rej) => {
+            return config.db().then( db => {
+                db.request()
+                    .input('access_code', sql.TYPES.VarChar, this.role)
+                    .execute('setRole')
+                    .then( data => {
+                        return res(data)
+                    })
+                    .catch( e => {
+                        console.log(e)
+                        return res(e)
+                    })
+            })
+        })
+
     }
 }
 

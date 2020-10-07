@@ -45,3 +45,10 @@ create trigger tg_set_role on login after insert
 AS
 declare @id_user int = (select IDENT_CURRENT('login'))
 insert into role values(@id_user, '100')
+
+
+create PROCEDURE setRole @access_code varchar(3)
+as
+declare @id_user int = (select IDENT_CURRENT('login'))
+insert into role values(@id_user, @access_code)
+
