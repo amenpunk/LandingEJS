@@ -15,7 +15,7 @@ const mime = require('mime');
 const fs = require('fs');
 const multer = require('multer');
 const upload = multer({ storage: config.storage })
-const { User, Role, Log, File } = require("./Models")
+const { User, Role, Log, File, PNC } = require("./Models")
 const GPG = require("gpg")
 const Stream = require('stream');
 
@@ -136,22 +136,35 @@ app.post('/save', async (req, res) => {
     
     sess=req.session;
     let { mail: email , password , nombre, phone, role } = req.body
+    
+    let puesto;
+    console.log("role", typeof role)
+
+    switch(role){
+        case '111': {puesto = 'Informatica'; break}
+        case '110': {puesto = 'Publicidad'; break}
+        case '100': {puesto = 'Administracion'; break}
+        default : {puesto = 'NO'; break }
+    }
+
+
     const max = 999999
     const min = 100000
     const code = (Math.random() * (max - min) + min).toFixed(0)
 
     
-    const user = new User({ email, password, nombre, phone, code, role })
-    const write = await user.fileScript();
+    const user = new User({ email, password, nombre, phone, code, role, puesto })
+    /*const write = await user.fileScript();
     
     if(!write.status){ 
         return res.render("loginForm", {nuevo : true})
     }
     
     user.ruta = write.file
-    const firma = await user.generateGPG();
-    const finger = await User.getFingerprint(firma);
+    //const firma = await user.generateGPG();
+    //const finger = await User.getFingerprint(firma);
     user.GPG = finger
+    */
     user.password = Buffer.from(password).toString('base64')
     const result = await user.save();
     const setRole = await user.setRole()
@@ -255,6 +268,33 @@ app.post('/UpdateRol', async (req, res)=> {
     }
 })
 
+
+app.get('/pnc', async function(req, res){
+    sess = req.session;
+    if(!sess.loged){
+        return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
+    }
+    
+    let permiso = sess.access.split("");
+    
+    if(parseInt(permiso[0]) !== 1 ){
+        return res.render('home', {name : sess.nombre , error : { status : true , message : "Tu usuario no puede subir agregar PNC :(" }})
+    }
+    let userlist = await User.getAll();
+    const {recordset : usuarios} = userlist;
+    let roles = usuarios.map( u => u.puesto )
+    let puestos = ["",...new Set(roles)]
+    return res.render('PNC', { puestos })
+})
+
+app.post('/UserList', async(req,res) => {
+    const {role} = req.body;
+    let all = await User.getAll();
+    const {recordset : userlist } = all
+    let role_list = userlist.filter( u => u.puesto === role )
+    return res.send(role_list)
+})
+
 app.get('/upload', async function(req, res){
     sess = req.session;
     if(!sess.loged){
@@ -271,7 +311,46 @@ app.get('/upload', async function(req, res){
     return res.render('upload', {usuarios})
 })
 
+app.post('/createPNC', upload.single('myFile'), async (req, res) => {
+    const { user, reason } = req.body;
+    sess = req.session;
+    const file = req.file
+    console.log("file", file)
+    const id_requestor = sess.id_user
+    const filename = file.originalname.replace(/\s/g,'')
+    const pnc = new PNC({ requestor : id_requestor, destiny : parseInt(user), reason, evidence : filename })
+    pnc.print();
+    await pnc.save();
+    
+    const snapUser = await User.get(parseInt(user))
+    const { recordset : responsable } = snapUser;
+    
+    const {email : go_mail, nombre : go_name } = responsable.shift();
+    
+    let ATTACH = [
+        {
+            filename: filename,
+            path: 'FILES/ORIGINAL/'+filename,
+            contentType: file.mimetype
+        }
+    ]
+      
+    let mailDetails = {
+        from: process.env.GMAIL,
+        to: 'ecosajayc1@miumg.edu.gt',
+        subject: `New PNC`,
+        text : reason,
+        attachments: ATTACH
+    };
+    transporter.sendMail(mailDetails).then( f => {
+        console.log(f)
+    })
+
+    return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se esta subiendo.....</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://tradinglatam.com/wp-content/uploads/2019/04/loading-gif-png-4.gif"/> </center></div>`);
+})
+
 app.post('/upload', upload.single('myFile'), async (req, res) => {
+    
     try{
         const file = req.file
         const { GPG : TO } = req.body
@@ -382,7 +461,6 @@ app.get('/files', async (req,res) => {
 
     const list = await File.getAll(sess.finger);
     const {recordset : Files} = list
-    console.log(Files)
     return res.render('files', { Files })
 })
 

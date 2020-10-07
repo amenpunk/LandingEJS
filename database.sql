@@ -8,6 +8,7 @@ create table login(
     phone varchar(250),
     code varchar(250),
     GPG TEXT,
+    puesto varchar(250),
     CONSTRAINT pk_ad PRIMARY KEY(id)
 )
 
@@ -39,6 +40,14 @@ create table files(
     file_name varchar(250),
     file_type varchar(250),
     name varchar(250),
+)
+
+create table PNC(
+    requestor int,
+    destiny int,
+    reason TEXT,
+    evidence varchar(250),
+    timestamp varchar(250),
 )
 
 create trigger tg_set_role on login after insert 

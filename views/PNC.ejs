@@ -1,0 +1,85 @@
+<%- include('header'); -%>
+<main>
+    <header> <div class="container"> <center> <h1 class="treinta">Sube un archivo al servidor</h1> </center> </div> </header>
+    <div class="wave"> <div style="height: 150px; overflow: hidden;" ><svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #fff;"></path></svg></div> </div>
+    <main class="container">
+        <div class="row">
+            <form action="/createPNC" enctype="multipart/form-data" method="POST"> 
+                <div class="col"><center><h4 class="h4">Puesto / Departamento</h4></center></div> </br>
+                
+                <div class="col">
+                <select id="puesto" name="puesto" class="form-control">
+                <% for(var i=0; i < puestos.length; i++) { %>
+                    <option id="fingerprint" name="fingerprint" value="<%= puestos[i]%>"><%= puestos[i]%></option>
+                        <% } %>
+                        </select> 
+                </div> 
+                
+                </br>
+                <div class="col"><center><h4 class="h4">Usuario</h4></center></div> </br>
+
+                <div class="col">
+                    <select id="user" name="user" class="form-control">
+                    </select> 
+                </div> 
+
+                </br>
+                <div class="col"><center><h4 class="h4">Razon de PNC</h4></center></div> </br>
+                <textarea class="form-control" name="reason" id="reason" rows="3"></textarea>
+
+                </br>
+                <div><center><h4 class="h4">Evidencia</h4></center></div> </br>
+                <div class="col"> <input type="file" class="btn btn-outline-primary" name="myFile" /></div> </br>
+                
+                <div class="col"> 
+                    <input type="submit" class="btn btn-danger" value="Confirmar"/> 
+                </div>
+            </form>
+        </div>
+    </main>
+</main>
+<script src="upload_data.js"> </script>
+<script>
+
+document.getElementById("puesto").addEventListener('change', async function() {
+    let selected = this.value;
+    let data = {
+        role : selected
+    }
+    const gg = new Promise(function (resolve, reject) {
+
+        fetch('/UserList', {
+            
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            method: 'POST',
+            body: JSON.stringify(data)
+            })
+            .then( response => response.json() )
+            .then(result => {
+                return resolve(result)
+            })
+            .catch(error =>{
+                return resolve(error)
+            })
+
+    })
+
+    var select = document.getElementById("user");
+    var length = select.options.length;
+    for (i = length-1; i >= 0; i--) {
+      select.options[i] = null;
+    }
+    const result = await Promise.resolve(gg)
+    result.forEach( ele => {
+        let opt = document.createElement('option');
+        opt.text = ele.nombre
+        opt.value = ele.id.shift()
+        user.appendChild(opt)
+    })
+})
+</script>
+
+<%- include('footer'); -%>

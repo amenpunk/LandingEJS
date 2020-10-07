@@ -16,6 +16,7 @@ class User {
         this.ruta = user.ruta;
         this.GPG = user.GPG
         this.role = user.role
+        this.puesto = user.puesto
     }
     print(){
         console.log(this)
@@ -30,7 +31,8 @@ class User {
                     .input('phone', sql.TYPES.VarChar, this.phone)
                     .input('code', sql.TYPES.VarChar, this.code)
                     .input('GPG', sql.TYPES.Text, this.GPG)
-                    .query('insert into login(nombre, email, pass, phone, code, GPG) values(@nombre, @mail, @pass, @phone, @code, @GPG )')
+                    .input('puesto', sql.TYPES.VarChar, this.puesto)
+                    .query('insert into login(nombre, email, pass, phone, code, GPG, puesto) values(@nombre, @mail, @pass, @phone, @code, @GPG, @puesto)')
                     .then( data => {
                         return res(data)
                     })
@@ -74,6 +76,7 @@ class User {
         })
     }
     static getAll(){
+
         return new Promise((res,_rej) => {
             return config.db().then( db => {
                 db.request()
@@ -139,6 +142,22 @@ class User {
                 db.request()
                     .input('access_code', sql.TYPES.VarChar, this.role)
                     .execute('setRole')
+                    .then( data => {
+                        return res(data)
+                    })
+                    .catch( e => {
+                        console.log(e)
+                        return res(e)
+                    })
+            })
+        })
+    }
+    static get(id){
+        return new Promise((res,_rej) => {
+            return config.db().then( db => {
+                db.request()
+                    .input('user', sql.TYPES.Int, id)
+                    .query('select * from login where id=@user')
                     .then( data => {
                         return res(data)
                     })
