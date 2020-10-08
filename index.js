@@ -346,7 +346,7 @@ app.post('/createPNC', upload.single('myFile'), async (req, res) => {
         console.log(f)
     })
 
-    return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se esta subiendo.....</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://tradinglatam.com/wp-content/uploads/2019/04/loading-gif-png-4.gif"/> </center></div>`);
+    return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se esta subiendo.....</h1><script> setTimeout(function(){ window.location.href = '/monitoring' },3000); </script> <img src="https://tradinglatam.com/wp-content/uploads/2019/04/loading-gif-png-4.gif"/> </center></div>`);
 })
 
 app.post('/upload', upload.single('myFile'), async (req, res) => {
@@ -465,5 +465,48 @@ app.get('/files', async (req,res) => {
     const {recordset : Files} = list
     return res.render('files', { Files })
 })
+
+app.get('/monitoring', async (req,res) => {
+    
+    sess = req.session;
+    
+    if(!sess.loged){
+        return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }})
+    }
+    let permiso = sess.access.split("");
+
+    if(parseInt(permiso[0]) !== 1 ){
+        return res.render('home', {name : sess.nombre , error : { status : true , message : "Tu usuario no puede darle seguimiento a los PNC" }})
+    }
+
+    const list = await PNC.getAll();
+    const {recordset : pnc} = list
+    console.log(pnc)
+    return res.render('Monitoring', {pnc})
+})
+
+app.get("/updatePNC/:id/:status", async (req,res) => {
+    const id = req.params.id
+    const estado = parseInt(req.params.status) 
+
+    switch(estado){
+        case 0 : {
+            await PNC.delete(id)
+            break;
+        }
+        case 1 : {
+            await PNC.update(id, 1)
+            break;
+        }
+        case 2 : {
+            await PNC.update(id, 0)
+            break;
+        }
+    }
+    
+    return res.send(`<div style="font-size:30px"><center><h1>Cambiado el estado del PNC.....</h1><script> setTimeout(function(){ window.location.href = '/monitoring' },3000); </script> <img src="https://tradinglatam.com/wp-content/uploads/2019/04/loading-gif-png-4.gif"/> </center></div>`);
+
+})
+
 
 

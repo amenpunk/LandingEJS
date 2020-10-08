@@ -1,0 +1,52 @@
+<%- include('header'); -%>
+<link rel="stylesheet" href="estilos.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<link rel="stylesheet" href="estilos.css">
+<script src="https://www.google.com/recaptcha/api.js"></script>
+<main>
+    </br>
+    </br>
+    </br>
+    </br>
+    <div class="container">
+        <h1>Seguimiento de PNC</h1>
+        <center>
+            <table class="tg">
+                <thead>
+                    <tr>
+                        <th class="tg-0pky"> <center>ID</center> </th>
+                        <th class="tg-0pky"> <center>Razon</center> </th>
+                        <th class="tg-0pky"><center>Evidencia</center></th>
+                        <th class="tg-0pky"> <center>Fecha</center> </th>
+                        <th class="tg-0pky"> <center>Estado</center> </th>
+                        <th class="tg-0pky"><center>Operacion</center></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(var i=0; i < pnc.length; i++) { %>
+                            <tr>
+                                <td><%= pnc[i].id %></td>
+                                <td><%= pnc[i].reason %></td>
+                                <td><%= pnc[i].evidence %></td>
+                                <td><%= pnc[i].timestamp %></td>
+                                <td><% if(pnc[i].status) { %>
+                                    <span style="color : green">COMPLETADA</span>
+                                    <% } else{ %>
+                                    <span style="color : red">No atendida</span>
+                                    <% } %>
+                                <td>
+                                    <a href="/updatePNC/<%= pnc[i].id %>/2" class="btn btn-primary"><center>No completada</center></a>
+                                    <a href="/updatePNC/<%= pnc[i].id %>/0" class="btn btn-danger"><center>Eliminar</center></a>
+                                    <a href="/updatePNC/<%= pnc[i].id %>/1" class="btn btn-success"><center>Completar</center></a>
+                                </td>
+                            </tr>
+                            <% } %>
+                </tbody>
+            </table>
+        </center>
+    </div>
+</main>
+<script src="captcha.js"> </script>
+<%- include('footer'); -%>

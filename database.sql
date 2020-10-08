@@ -43,6 +43,7 @@ create table files(
 )
 
 create table PNC(
+    id int IDENTITY(1,1) not null,
     requestor int,
     destiny int,
     reason TEXT,
