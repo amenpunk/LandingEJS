@@ -176,13 +176,13 @@ app.post('/save', async (req, res) => {
         subject: 'Landing Page', 
         html: `<h1>Bienvenido</h1> <br> ingresa con el siguiente codigo: ${code}`
     };
-    /*
     transporter.sendMail(mailOptions, function (err, info) {
         if(err)
             console.log(err)
         else
             console.log(info);
     });
+    /*
     twilio.messages
         .create({
             body: `Tu codigo de ingreso es ${random}`,
@@ -337,7 +337,7 @@ app.post('/createPNC', upload.single('myFile'), async (req, res) => {
       
     let mailDetails = {
         from: process.env.GMAIL,
-        to: 'ecosajayc1@miumg.edu.gt',
+        to: go_mail,
         subject: `New PNC`,
         text : reason,
         attachments: ATTACH
@@ -361,6 +361,7 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
         const id = file.originalname.replace(/\s/g,'')
         sess.file = id;
         
+        /*
         const buffe_file = new Promise((resolve, _r) => {
             fs.readFile( 'FILES/ORIGINAL/'+ id , function(err, file) { 
                 if(err){
@@ -392,6 +393,7 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
 
         const encryptFile = await Promise.resolve(save)
         await fs.unlinkSync('FILES/ORIGINAL/'+ id)
+        */
 
         if (!file) {
             return res.send(`<div style="font-size:30px"><center><h1>El archivo ingresado no es valido </h1><script> setTimeout(function(){ window.location.href = '/upload'; },3000); </script> <img src="http://www.phuketontours.com/phuketontours/public/assets/front-end/images/404.gif"/> </center></div>`);
@@ -403,7 +405,7 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
        
         Promise.all([ log.save(), file_save.save() ])
         
-        return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se esta subiendo.....</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://tradinglatam.com/wp-content/uploads/2019/04/loading-gif-png-4.gif"/> </center></div>`);
+        return res.status(200).send(`<div style="font-size:30px"><center><h1>Tu archivo se esta subiendo.....</h1><script> setTimeout(function(){ window.location.href = '/files' },3000); </script> <img src="https://tradinglatam.com/wp-content/uploads/2019/04/loading-gif-png-4.gif"/> </center></div>`);
 
     }catch(e){
         console.log("error al subir el archivo:", e.message)
@@ -411,9 +413,11 @@ app.post('/upload', upload.single('myFile'), async (req, res) => {
     }
 })
 
-app.get('/download/:name/:id_origin/:id_dest', function(req, res){
+app.get('/download/:name', function(req, res){
+//app.get('/download/:name/:id_origin/:id_dest', function(req, res){
     
     const name = req.params.name
+    /*
     const id_origin = req.params.id_origin
     const id_dest = req.params.id_dest
 
@@ -426,19 +430,17 @@ app.get('/download/:name/:id_origin/:id_dest', function(req, res){
         '--recipient', id_dest,
         '--trust-model', 'always', // so we don't get "no assurance this key belongs to the given user"
     ];
+    */
     
-    var file = __dirname + `/FILES/ENCRIPTED/${name}`;
+    var file = __dirname + `/FILES/ORIGINAL/${name}`;
     var filename = path.basename(file);
     var mimetype = mime.lookup(file);
     res.setHeader('Content-disposition', 'attachment; filename=' + filename);
     res.setHeader('Content-type', mimetype);
     
-    var initStream = fs.createReadStream(file);
-    var outStream = new Stream.PassThrough;
+    var filestream = fs.createReadStream(file);
+    filestream.pipe(res);
 
-    GPG.callStreaming(initStream, outStream, args, (err) => {
-        outStream.pipe(res)
-    })
 
     const log =  new Log({ event : "DOWNLOAD", usuario : sess.id_user, file_name : name, file_type : "" })
     log.save();

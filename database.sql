@@ -48,6 +48,7 @@ create table PNC(
     reason TEXT,
     evidence varchar(250),
     timestamp varchar(250),
+    status BIT
 )
 
 create trigger tg_set_role on login after insert 

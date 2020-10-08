@@ -22,7 +22,7 @@ class PNC {
                     .input('reason', sql.TYPES.Text, this.reason )
                     .input('evidence', sql.TYPES.VarChar, this.evidence )
                     .input('timestamp', sql.TYPES.VarChar,this.timestamp)
-                    .query('insert into PNC(requestor, destiny, reason, evidence, timestamp) values(@requestor, @destiny, @reason, @evidence, @timestamp )')
+                    .query('insert into PNC(requestor, destiny, reason, evidence, timestamp, status) values(@requestor, @destiny, @reason, @evidence, @timestamp, false )')
                     .then( data => {
                         return res(data)
                     })

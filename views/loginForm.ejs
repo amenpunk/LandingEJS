@@ -3,6 +3,7 @@
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 <link rel="stylesheet" href="estilos.css">
+<script src="https://www.google.com/recaptcha/api.js"></script>
 <div class="wave">
     <div style="height: 150px; overflow: hidden;" ><svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%;"><path d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z" style="stroke: none; fill: #fff;"></path></svg></div>
 </div>
@@ -25,7 +26,7 @@
                         <% } %> 
                         <input class="form-control" id="MAIL" autocomplete="off" autocomplete="no" type="email" required="required" name="mail" placeholder="Email" />
                         <% if  (nuevo) { %>
-                        <input class="form-control" id="PASS" autocomplete="off" autocomplete="no" required="required" name="password" placeholder="Password" />
+                        <input type="password" class="form-control" id="PASS" autocomplete="off" autocomplete="no" required="required" name="password" placeholder="Password" />
                         <input class="form-control" type="text" required="required" name="nombre" placeholder="Name" />
                         <input class="form-control" type="text" required="required" name="phone"  maxlength="8" placeholder="Phone" />
                         </br>
