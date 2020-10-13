@@ -19,6 +19,8 @@
                         <th class="tg-0pky"> <center>Nombre</center> </th>
                         <th class="tg-0pky"><center>Email</center></th>
                         <th class="tg-0pky"> <center> [ Lectura | Escritura | Modificacion ] </center> </th>
+                        <th class="tg-0pky"> <center>Departamento</center> </th>
+                        <th class="tg-0pky"> <center>Puesto</center> </th>
                         <th class="tg-0pky"><center>Operacion</center></th>
                     </tr>
                 </thead>
@@ -46,6 +48,8 @@
                                         <% } %> 
                                     </center>
                                 </td>
+                                <td><%= Users[i].departamento %></td>
+                                <td><input name="puesto" id="puesto" value="<%=Users[i].puesto%>"></td>
                                 <td><button onclick="Actualizar(<%=id%>)" class="btn btn-success"><center>Actualizar</center></button></td>
                             </tr>
                             <% } %>

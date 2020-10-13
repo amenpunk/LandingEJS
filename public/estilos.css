@@ -143,3 +143,9 @@ input[type='checkbox']{
     width : 25px;
     height : 25px;
 }
+
+#puesto{
+    height : 20px;
+    padding : 10;
+    margin : 0;
+}

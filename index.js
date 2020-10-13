@@ -158,7 +158,6 @@ app.post('/save', async (req, res) => {
 
     
     const user = new User({ email, password, nombre, phone, code, role : role_info.access_code, dep : role_info.name })
-    user.print();
     /*const write = await user.fileScript();
     
     if(!write.status){ 
@@ -242,7 +241,6 @@ app.get('/users', async (req, res)=> {
         return res.render('home', {name : sess.nombre, error : { status : true , message : "Tu usuario no puede modificar los permisos :( " }})
     }
     const list = User.getAll(); 
-    console.log(list)
     let Result = await list;
     const {recordset : Users} = Result
     return res.render('roles', { Users })
@@ -250,8 +248,9 @@ app.get('/users', async (req, res)=> {
 
 app.post('/UpdateRol', async (req, res)=> {
 
-    const {id, access_code} = req.body;
-    const role = new Role({id, access_code})
+    const {id, access_code, puesto} = req.body;
+    const role = new Role({id, access_code, puesto})
+    role.print();
     let result = await role.update();
     let {rowsAffected} = result
     let aff = parseInt(rowsAffected.shift()) > 0

@@ -18,7 +18,8 @@ class Role {
                 db.request()
                     .input('id', sql.TYPES.VarChar, this.id )
                     .input('access_code', sql.TYPES.VarChar, this.access_code )
-                    .query('update role set access_code=(@access_code) where id=(@id)')
+                    .input('puesto', sql.TYPES.VarChar, this.puesto )
+                    .query('update role set access_code=(@access_code), puesto=(@puesto) where id=(@id)')
                     .then( data => {
                         return res(data)
                     })

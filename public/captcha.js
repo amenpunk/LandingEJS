@@ -93,11 +93,14 @@ function Actualizar(id){
     let lec = document.getElementById(`lec-${id}`)
     let esc  = document.getElementById(`esc-${id}`)
     let mod  = document.getElementById(`mod-${id}`)
+    let puesto = document.getElementById("puesto").value
+ 
     let NuevoPermiso = (lec.checked ? "1" : "0").concat(esc.checked ? "1" : "0").concat(mod.checked ? "1" : "0")
     
     const data = {
         id: id,
-        access_code: NuevoPermiso
+        access_code: NuevoPermiso,
+        puesto
     };
     fetch('/UpdateRol', {
         headers: {
