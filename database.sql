@@ -8,16 +8,9 @@ create table login(
     phone varchar(250),
     code varchar(250),
     GPG TEXT,
-    puesto varchar(250),
     CONSTRAINT pk_ad PRIMARY KEY(id)
 )
 
-create table role(
-    id int,
-    access_code varchar(3),
-    CONSTRAINT pk_role PRIMARY KEY(id),
-    CONSTRAINT fk_role FOREIGN KEY(id) REFERENCES login(id)
-)
 
 insert into login(nombre,email,pass,phone,code) values('ming', 'ming@ming.com', '$xxx31mmM', '55552222', '1111')
 create table blacklist(
@@ -52,14 +45,29 @@ create table PNC(
     status BIT
 )
 
-create trigger tg_set_role on login after insert 
-AS
-declare @id_user int = (select IDENT_CURRENT('login'))
-insert into role values(@id_user, '100')
+create table section(
+    id int IDENTITY(1,1) not null,
+    access_code varchar(3),
+    name varchar(250)
+)
 
-
-create PROCEDURE setRole @access_code varchar(3)
+create table role(
+    id int,
+    access_code varchar(3),
+    departamento varchar(250),
+    puesto varchar(250),
+    CONSTRAINT pk_role PRIMARY KEY(id),
+    CONSTRAINT fk_role FOREIGN KEY(id) REFERENCES login(id)
+)
+ 
+create PROCEDURE setRole @access_code varchar(3), @departamento varchar(250)
 as
 declare @id_user int = (select IDENT_CURRENT('login'))
-insert into role values(@id_user, @access_code)
+declare @puesto varchar(250) = 'NULL'
+insert into role values(@id_user, @access_code, @departamento, @puesto)
+
+
+insert into section (access_code, name) values('111', "Informatica")
+insert into section (access_code, name) values('110', "Publicidad")
+insert into section (access_code, name) values('100', "Administracion")
 

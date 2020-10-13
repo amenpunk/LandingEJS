@@ -79,7 +79,15 @@ app.get('/login', async (req, res) => {
     if(sess.loged){
         return res.render('home', {name : sess.name, nuevo : register})
     }
-    return res.render("loginForm", {nuevo : register})
+    
+    console.log('register', register)
+    let allRoles
+    if(register){
+        let query = await Role.get();
+        console.log(query)
+        allRoles = query.recordset;
+    }
+    return res.render("loginForm", {nuevo : register, roles : allRoles})
 })
 
 app.post('/login', async (req, res) => {
@@ -96,6 +104,7 @@ app.post('/login', async (req, res) => {
 
     const result = await User.verifyCredentials(mail)
     const {recordset} = result
+    console.log("usuario: ",recordset)
     if(recordset.length <= 0){
         //sess.try = sess.try ? { num : sess.try.num +1 , email :  sess.try.email.concat(mail) } : { num : 1 , email : [mail] }
         //return res.render('landingpage', {error : { status : true, message : `No existe ningun usuario registrado con este correo, intentos restante ${3 - sess.try.num}` }})
@@ -138,22 +147,18 @@ app.post('/save', async (req, res) => {
     let { mail: email , password , nombre, phone, role } = req.body
     
     let puesto;
-    console.log("role", typeof role)
-
-    switch(role){
-        case '111': {puesto = 'Informatica'; break}
-        case '110': {puesto = 'Publicidad'; break}
-        case '100': {puesto = 'Administracion'; break}
-        default : {puesto = 'NO'; break }
-    }
-
+    const query = await Role.get();
+    const {recordset} = query;
+    
+    const role_info = recordset.filter( r => r.id === parseInt( role) ).shift();
 
     const max = 999999
     const min = 100000
     const code = (Math.random() * (max - min) + min).toFixed(0)
 
     
-    const user = new User({ email, password, nombre, phone, code, role, puesto })
+    const user = new User({ email, password, nombre, phone, code, role : role_info.access_code, dep : role_info.name })
+    user.print();
     /*const write = await user.fileScript();
     
     if(!write.status){ 
@@ -168,7 +173,6 @@ app.post('/save', async (req, res) => {
     user.password = Buffer.from(password).toString('base64')
     const result = await user.save();
     const setRole = await user.setRole()
-    console.log("set role result:", setRole)
     
     const mailOptions = {
         from: process.env.GMAIL,
@@ -238,6 +242,7 @@ app.get('/users', async (req, res)=> {
         return res.render('home', {name : sess.nombre, error : { status : true , message : "Tu usuario no puede modificar los permisos :( " }})
     }
     const list = User.getAll(); 
+    console.log(list)
     let Result = await list;
     const {recordset : Users} = Result
     return res.render('roles', { Users })

@@ -6,6 +6,8 @@ class Role {
     constructor(role){
         this.id = role.id
         this.access_code = role.access_code
+        this.departamento = role.departamento
+        this.puesto = role.puesto
     }
     print(){
         console.log(this)
@@ -26,6 +28,23 @@ class Role {
                     })
             })
         })
+
+    }
+    static get(){
+        return new Promise((res,_rej) => {
+            return config.db().then( db => {
+                db.request()
+                    .query('select * from section')
+                    .then( data => {
+                        return res(data)
+                    })
+                    .catch( e => {
+                        console.log(e)
+                        return res(e)
+                    })
+            })
+        })
+
 
     }
 }

@@ -31,16 +31,19 @@
                         <input class="form-control" type="text" required="required" name="phone"  maxlength="8" placeholder="Phone" />
                         </br>
                         </br>
-                        <select id="role" name="role" class="form-control">
-                            <option value="111"> Informatica</option>
-                            <option value="110"> Publicidad</option>
-                            <option value="100"> Administracion</option>
-                        </select>
+
+
+
+                <select id="role" name="role" class="form-control">
+                <% for(var i=0; i < roles.length; i++) { %>
+                    <option  value="<%=roles[i].id%>"><%= roles[i].name%></option>
+                        <% } %>
+                        </select> 
+
                         <% } else { %>
 
                         <input class="form-control" type="password" required="required" name="password" placeholder="Password" />
                         <input class="form-control" type="text" autocomplete="off" autocomplete="no" required="required" name="code" placeholder="Secret Code" />
-
 
                         <% } %> 
                         <center>
