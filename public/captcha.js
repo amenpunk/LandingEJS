@@ -93,7 +93,7 @@ function Actualizar(id){
     let lec = document.getElementById(`lec-${id}`)
     let esc  = document.getElementById(`esc-${id}`)
     let mod  = document.getElementById(`mod-${id}`)
-    let puesto = document.getElementById("puesto").value
+    let puesto = document.getElementById(`${id}-puesto`).value
  
     let NuevoPermiso = (lec.checked ? "1" : "0").concat(esc.checked ? "1" : "0").concat(mod.checked ? "1" : "0")
     

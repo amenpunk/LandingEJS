@@ -18,6 +18,10 @@ const upload = multer({ storage: config.storage })
 const { User, Role, Log, File, PNC } = require("./Models")
 const GPG = require("gpg")
 const Stream = require('stream');
+const ejs = require('ejs')
+const puppetear = require('puppeteer')
+const  { Readable }  = require('stream') 
+
 
 
 var transporter = nodemailer.createTransport({
@@ -286,7 +290,7 @@ app.get('/pnc', async function(req, res){
     }
     let userlist = await User.getAll();
     const {recordset : usuarios} = userlist;
-    let roles = usuarios.map( u => u.puesto )
+    let roles = usuarios.map( u => u.departamento )
     let puestos = ["",...new Set(roles)]
     return res.render('PNC', { puestos })
 })
@@ -295,7 +299,7 @@ app.post('/UserList', async(req,res) => {
     const {role} = req.body;
     let all = await User.getAll();
     const {recordset : userlist } = all
-    let role_list = userlist.filter( u => u.puesto === role )
+    let role_list = userlist.filter( u => u.departamento === role )
     return res.send(role_list)
 })
 
@@ -512,5 +516,38 @@ app.get("/updatePNC/:id/:status", async (req,res) => {
 
 })
 
+app.post("/gps", (req,res) => {
+    console.log({time : new Date().toLocaleTimeString(), body :req.body })
+    return res.send({status : true})
+})
 
+app.post("/gps_stop", (req,res) => {
+    console.log({time : new Date().toLocaleTimeString(), status : "GPS STOPED" })
+    return res.send({status : false})
+})
 
+app.get('/pdf', async (req,res) => {
+    try{
+        ejs.renderFile('./views/pdf.ejs', { title : "puta madre" }, {}, async function(err, html)  {
+            if(err) console.log(err)
+            console.log(html)
+            let create = await config.toPDF(html);
+            const buffer = new Buffer(create)
+            const readable = new Readable()
+            readable._read = (e) => { console.log(e) } // _read is required but you can noop it
+            readable.push(buffer)
+            readable.push(null)
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=quote.pdf');
+            readable.pipe(res)
+
+            //console.log(create)
+
+        })   
+    }catch(e){
+        console.log(e)
+        return res.end()
+    }
+
+})

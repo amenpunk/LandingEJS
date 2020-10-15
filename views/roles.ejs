@@ -49,7 +49,7 @@
                                     </center>
                                 </td>
                                 <td><%= Users[i].departamento %></td>
-                                <td><input name="puesto" id="puesto" value="<%=Users[i].puesto%>"></td>
+                                <td><input name="puesto" id="<%=Users[i].id%>-puesto" value="<%=Users[i].puesto%>"></td>
                                 <td><button onclick="Actualizar(<%=id%>)" class="btn btn-success"><center>Actualizar</center></button></td>
                             </tr>
                             <% } %>
