@@ -6,6 +6,13 @@ const path = require('path');
 const { exec } = require("child_process")
 const GPG = require("gpg")
 
+
+const today = new Date();
+const dd = String(today.getDate()).padStart(2, '0');
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const yyyy = today.getFullYear();
+const dateNow = mm + "/" + dd + "/" + yyyy;
+
 class User {
     constructor(user){
         this.nombre = user.nombre;
@@ -17,6 +24,7 @@ class User {
         this.GPG = user.GPG
         this.role = user.role
         this.departamento = user.dep
+        this.fecha = dateNow
     }
     print(){
         console.log(this)
@@ -31,7 +39,8 @@ class User {
                     .input('phone', sql.TYPES.VarChar, this.phone)
                     .input('code', sql.TYPES.VarChar, this.code)
                     .input('GPG', sql.TYPES.Text, this.GPG)
-                    .query('insert into login(nombre, email, pass, phone, code, GPG) values(@nombre, @mail, @pass, @phone, @code, @GPG)')
+                    .input('fecha', sql.TYPES.VarChar, this.fecha)
+                    .query('insert into login(nombre, email, pass, phone, code, GPG, fecha) values(@nombre, @mail, @pass, @phone, @code, @GPG, @fecha)')
                     .then( data => {
                         return res(data)
                     })
@@ -166,7 +175,6 @@ class User {
                     })
             })
         })
-
     }
 }
 

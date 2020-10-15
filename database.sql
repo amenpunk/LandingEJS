@@ -7,7 +7,7 @@ create table login(
     pass varchar(250),
     phone varchar(250),
     code varchar(250),
-    time datetime,
+    fecha varchar(50),
     GPG TEXT,
     CONSTRAINT pk_ad PRIMARY KEY(id)
 )

@@ -276,6 +276,56 @@ app.post('/UpdateRol', async (req, res)=> {
     }
 })
 
+app.post('/userPDF', async function(req, res){ 
+    
+    const {start, end, departamento : type} = req.body;
+    let query = await User.getAll();
+    let Users = query.recordset;
+
+    console.log(type)
+    if(type && type.length > 0){
+        Users = Users.filter(u => u.departamento === type)
+    }
+    console.log(start, end)
+    if(start && end){
+        Users = Users.filter(u => {
+            let created_at = new Date(u.fecha)
+            return created_at < new Date(end) && created_at > new Date(start)
+        })
+    }
+    
+    ejs.renderFile('./views/userPDF.ejs', { Titulo : "Reporte de Usuarios",  Users }, {}, async function(err, html)  {
+        if(err) console.log(err)
+
+        let create = await config.toPDF(html);
+        const buffer = new Buffer(create)
+        const readable = new Readable()
+        readable._read = (e) => { console.log(e) } 
+        readable.push(buffer)
+        readable.push(null)
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=report.pdf');
+        readable.pipe(res)
+    })   
+})
+
+
+
+app.get('/reportes', async function(req, res){
+    sess = req.session;
+    if(!sess.loged){ return res.render('landingpage', {error : { status : true , message : "Logeate para ver el contenido" }}) }
+    let permiso = sess.access.split("");
+    if(parseInt(permiso[0]) !== 1 ){
+        return res.render('home', {name : sess.nombre , error : { status : true , message : "Tu usuario no puede ver reportes" }})
+    }
+
+
+    let query = await Role.get();
+    let Roles = query.recordset;
+
+    return res.render('pdf', {  Roles })
+})
 
 app.get('/pnc', async function(req, res){
     sess = req.session;
@@ -530,21 +580,19 @@ app.get('/pdf', async (req,res) => {
     try{
         ejs.renderFile('./views/pdf.ejs', { title : "puta madre" }, {}, async function(err, html)  {
             if(err) console.log(err)
-            console.log(html)
+            
             let create = await config.toPDF(html);
             const buffer = new Buffer(create)
             const readable = new Readable()
-            readable._read = (e) => { console.log(e) } // _read is required but you can noop it
+            readable._read = (e) => { console.log(e) } 
             readable.push(buffer)
             readable.push(null)
 
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'attachment; filename=quote.pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=report.pdf');
             readable.pipe(res)
-
-            //console.log(create)
-
         })   
+
     }catch(e){
         console.log(e)
         return res.end()

@@ -1,0 +1,31 @@
+<%- include('pdfHeader'); -%>
+    <h1 class="h1"><%= Titulo %></h1>
+    </br > </br > 
+    <table class="table table-responsive table-striped" style="border : 1px solid #1e1e1e">
+        <thead class="thead-dark">
+            <tr>
+                <th class="tg-0pky"> Nombre </th>
+                <th class="tg-0pky"> Email</th>
+                <th class="tg-0pky"> Departamento </th>
+                <th class="tg-0pky"> Puesto </th>
+                <th class="tg-0pky"> Telefono</th>
+                <th class="tg-0pky"> Creacion</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(var i=0; i < Users.length; i++) {
+                    let gg = Users[i].access_code.toString().split('');
+                    let id = Users[i].id.shift()
+                    let [lec, esc, mod] = gg %>
+                    <tr>
+                        <td><%= Users[i].nombre %></td>
+                        <td><%= Users[i].email %></td>
+                        <td><%= Users[i].departamento %></td>
+                        <td><%=Users[i].puesto%></td>
+                        <td><%=Users[i].phone%></td>
+                        <td><%=  new Date( Users[i].fecha).toString() %></td>
+                    </tr>
+                    <% } %>
+        </tbody>
+    </table>
+<%- include('pdfFooter'); -%>

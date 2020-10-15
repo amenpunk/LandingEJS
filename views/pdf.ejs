@@ -1,9 +1,120 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <%= title %>
-    </head>
-    <body>
-        <!-- the content goes here -->
-    </body>
-</html>
+<%- include('header'); -%>
+<main>
+        
+    <div class="row">
+    <h1 class="h1">Reportes</h1>
+            
+            <div class="col-12 pdf"> 
+                <p class="h1">Usuario</p>
+                    <form method="POST" action="/userPDF">
+                      
+                        <div class="form-group">
+                            
+                            <label for="exampleInputEmail1">fecha de inicio</label>
+                            <input type="date" class="form-control" name="start" id="start" aria-describedby="emailHelp" >
+
+                            <label for="exampleInputEmail1">fecha final</label>
+                            <input type="date" class="form-control" name="end" id="end" aria-describedby="emailHelp" >
+
+                        </div>
+
+                      <label for="exampleInputEmail1">Departamento</label>
+                      
+                <select id="departamento" name="departamento" class="form-control">
+                    <option value="">Selecciona un departamento</option>
+                    <% for(var i=0; i < Roles.length; i++) { %>
+                    <option  value="<%=Roles[i].name%>"><%= Roles[i].name%></option>
+                    <% } %>
+                </select> 
+
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+            </div>
+
+            <div class="col-12 pdf"> 
+                <p class="h1">Correos</p>
+                    <form>
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Email address</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                      </div>
+                      <div class="form-group">
+                          <label for="exampleInputPassword1">Password</label>
+                          <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                      </div>
+                      <div class="form-check">
+                          <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                          <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+            </div>
+            
+            <div class="col-12 pdf"> 
+                <p class="h1">PNC </p>
+                    <form>
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Email address</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                      </div>
+                      <div class="form-group">
+                          <label for="exampleInputPassword1">Password</label>
+                          <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                      </div>
+                      <div class="form-check">
+                          <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                          <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+            </div>
+
+            <div class="col-12 pdf"> 
+                <p class="h1">Login</p>
+                    <form>
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Email address</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                      </div>
+                      <div class="form-group">
+                          <label for="exampleInputPassword1">Password</label>
+                          <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                      </div>
+                      <div class="form-check">
+                          <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                          <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+            </div>
+            
+           
+            <div class="col-12 pdf"> 
+                <p class="h1">Archivos</p>
+                    <form>
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Email address</label>
+                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                      </div>
+                      <div class="form-group">
+                          <label for="exampleInputPassword1">Password</label>
+                          <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                      </div>
+                      <div class="form-check">
+                          <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                          <label class="form-check-label" for="exampleCheck1">Check me out</label>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+            </div>
+
+
+
+
+    </div>
+</main>
+<%- include('footer'); -%>
