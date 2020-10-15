@@ -310,6 +310,42 @@ app.post('/userPDF', async function(req, res){
     })   
 })
 
+app.post('/mailPDF', async function(req, res){ 
+    
+    const { estado_correo ,start, end, departamento : type} = req.body;
+    let query = await Log.getMails()
+    let Mails = query.recordset;
+
+    if(type && type.length > 0){
+        Mails = Mails.filter(u => u.departamento === type)
+    }
+
+    console.log(start, end)
+    if(start && end){
+        Mails = Mails.filter(u => {
+            let created_at = new Date(u.fecha)
+            return created_at < new Date(end) && created_at > new Date(start)
+        })
+    }
+    
+    Mails = Mails.filter( m => m.estado === estado_correo )
+    
+    ejs.renderFile('./views/mailPDF.ejs', { Titulo : "Reporte Correos",  Mails }, {}, async function(err, html)  {
+        if(err) console.log(err)
+
+        let create = await config.toPDF(html);
+        const buffer = new Buffer(create)
+        const readable = new Readable()
+        readable._read = (e) => { console.log(e) } 
+        readable.push(buffer)
+        readable.push(null)
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=report.pdf');
+        readable.pipe(res)
+    })   
+})
+
 
 
 app.get('/reportes', async function(req, res){
@@ -370,41 +406,72 @@ app.get('/upload', async function(req, res){
 })
 
 app.post('/createPNC', upload.single('myFile'), async (req, res) => {
-    const { user, reason } = req.body;
-    sess = req.session;
-    const file = req.file
-    console.log("file", file)
-    const id_requestor = sess.id_user
-    const filename = file.originalname.replace(/\s/g,'')
-    const pnc = new PNC({ requestor : id_requestor, destiny : parseInt(user), reason, evidence : filename })
-    pnc.print();
-    await pnc.save();
-    
-    const snapUser = await User.get(parseInt(user))
-    const { recordset : responsable } = snapUser;
-    
-    const {email : go_mail, nombre : go_name } = responsable.shift();
-    
-    let ATTACH = [
-        {
-            filename: filename,
-            path: 'FILES/ORIGINAL/'+filename,
-            contentType: file.mimetype
-        }
-    ]
-      
-    let mailDetails = {
-        from: process.env.GMAIL,
-        to: go_mail,
-        subject: `New PNC`,
-        text : reason,
-        attachments: ATTACH
-    };
-    transporter.sendMail(mailDetails).then( f => {
-        console.log(f)
-    })
+    try{
+        const { user, reason, puesto } = req.body;
+        console.log(req.body)
+        sess = req.session;
+        const file = req.file
+        console.log("file", file)
+        const id_requestor = sess.id_user
+        const filename = file.originalname.replace(/\s/g,'')
+        const pnc = new PNC({ requestor : id_requestor, destiny : parseInt(user), reason, evidence : filename })
+        pnc.print();
+        await pnc.save();
 
-    return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se esta subiendo.....</h1><script> setTimeout(function(){ window.location.href = '/monitoring' },3000); </script> <img src="https://tradinglatam.com/wp-content/uploads/2019/04/loading-gif-png-4.gif"/> </center></div>`);
+        const snapUser = await User.get(parseInt(user))
+        const { recordset : responsable } = snapUser;
+
+        const {email : go_mail, nombre : go_name } = responsable.shift();
+
+        let ATTACH = [
+            {
+                filename: filename,
+                path: 'FILES/ORIGINAL/'+filename,
+                contentType: file.mimetype
+            }
+        ]
+
+        let mailDetails = {
+            from: process.env.GMAIL,
+            to: go_mail,
+            subject: `New PNC`,
+            text : reason,
+            attachments: ATTACH
+        };
+    
+        transporter.sendMail(mailDetails, function (err, info) {
+            if(err){
+
+                let Info = {
+                    destino : go_mail,
+                    origen : sess.nombre,
+                    departamento :  puesto,
+                    motivo : reason, 
+                    estado : "FAIL"
+                }
+                Log.MailLog(Info)
+
+            }
+            else{
+                let Info = {
+                    destino : go_mail,
+                    origen : sess.nombre,
+                    departamento :  puesto,
+                    motivo : reason, 
+                    estado : "SUCCESS"
+                }
+                Log.MailLog(Info)
+                console.log(f)
+
+            }
+        });
+
+        return res.send(`<div style="font-size:30px"><center><h1>Tu archivo se esta subiendo.....</h1><script> setTimeout(function(){ window.location.href = '/monitoring' },3000); </script> <img src="https://tradinglatam.com/wp-content/uploads/2019/04/loading-gif-png-4.gif"/> </center></div>`);
+
+    }catch(e){
+        console.log(e)
+    }
+
 })
 
 app.post('/upload', upload.single('myFile'), async (req, res) => {

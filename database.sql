@@ -60,6 +60,16 @@ create table role(
     CONSTRAINT pk_role PRIMARY KEY(id),
     CONSTRAINT fk_role FOREIGN KEY(id) REFERENCES login(id)
 )
+
+
+create table mail_log(
+    fecha varchar(50),
+    estado varchar(50),
+    destino varchar(50),
+    origen varchar(50),
+    departamento varchar(50),
+    motivo varchar(250)
+)
  
 create PROCEDURE setRole @access_code varchar(3), @departamento varchar(250)
 as

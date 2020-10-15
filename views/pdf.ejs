@@ -33,21 +33,38 @@
 
             <div class="col-12 pdf"> 
                 <p class="h1">Correos</p>
-                    <form>
+                    <form method="POST" action="/mailPDF">
+
                       <div class="form-group">
-                        <label for="exampleInputEmail1">Email address</label>
-                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-                        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                        <label for="exampleInputEmail1">Estado</label>
+                        <select class="form-control" id="estado_correo" name="estado_correo">
+                            <option value="SUCCESS">Enviados</option>
+                            <option value="FAIL">No enviado</option>
+                        </select>
                       </div>
-                      <div class="form-group">
-                          <label for="exampleInputPassword1">Password</label>
-                          <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                      </div>
-                      <div class="form-check">
-                          <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                          <label class="form-check-label" for="exampleCheck1">Check me out</label>
-                      </div>
+
+                        <div class="form-group">
+                            
+                            <label for="exampleInputEmail1">fecha de inicio</label>
+                            <input type="date" class="form-control" name="start" id="start" aria-describedby="emailHelp" >
+
+                            <label for="exampleInputEmail1">fecha final</label>
+                            <input type="date" class="form-control" name="end" id="end" aria-describedby="emailHelp" >
+
+                        </div>
+                      
+                        <label for="exampleInputEmail1">Departamento</label>
+                        <select id="departamento" name="departamento" class="form-control">
+                        <option value="">Selecciona un departamento</option>
+                        <% for(var i=0; i < Roles.length; i++) { %>
+                            <option  value="<%=Roles[i].name%>"><%= Roles[i].name%></option>
+                                <% } %>
+                                </select> 
+
+
+
                       <button type="submit" class="btn btn-primary">Submit</button>
+
                     </form>
             </div>
             

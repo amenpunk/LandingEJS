@@ -1,0 +1,28 @@
+<%- include('pdfHeader'); -%>
+    <h1 class="h1"><%= Titulo %></h1>
+    </br > </br > 
+    <table class="table table-responsive table-striped" style="border : 1px solid #1e1e1e">
+        <thead class="thead-dark">
+            <tr>
+                <th class="tg-0pky"> Fecha </th>
+                <th class="tg-0pky"> Estado</th>
+                <th class="tg-0pky"> Destino </th>
+                <th class="tg-0pky"> Origen</th>
+                <th class="tg-0pky"> Departamento</th>
+                <th class="tg-0pky"> Motivo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(var i=0; i < Mails.length; i++) { %>
+                <tr>
+                    <td><%= new Date( Mails[i].fecha).toString() %></td>
+                    <td><%= Mails[i].estado %></td>
+                    <td><%= Mails[i].destino %></td>
+                    <td><%= Mails[i].origen %></td>
+                    <td><%= Mails[i].departamento %></td>
+                    <td><%= Mails[i].motivo %></td>
+                </tr>
+                <% } %>
+        </tbody>
+    </table>
+<%- include('pdfFooter'); -%>

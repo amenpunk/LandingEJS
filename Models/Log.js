@@ -2,6 +2,12 @@
 const sql = require('mssql')
 const { config } = require("../config")
 
+const today = new Date();
+const dd = String(today.getDate()).padStart(2, '0');
+const mm = String(today.getMonth() + 1).padStart(2, '0');
+const yyyy = today.getFullYear();
+const dateNow = mm + "/" + dd + "/" + yyyy;
+
 class Log { 
     constructor(log){
         this.mark = new Date();
@@ -49,6 +55,46 @@ class Log {
                     })
             })
         })
+
+    }
+    static MailLog(Info){
+        return new Promise((res,_rej) => {
+            return config.db().then( db => {
+                db.request()
+                    .input('fecha', sql.TYPES.VarChar, dateNow )
+                    .input('estado', sql.TYPES.VarChar, Info.estado )
+                    .input('destino', sql.TYPES.VarChar, Info.destino )
+                    .input('origen', sql.TYPES.VarChar, Info.origen)
+                    .input('departamento', sql.TYPES.VarChar, Info.departamento )
+                    .input('motivo', sql.TYPES.VarChar, Info.motivo )
+                    .query("insert into mail_log values(@fecha,@estado,@destino,@origen,@departamento,@motivo)")
+                    .then( data => {
+                        return res(data)
+                    })
+                    .catch( e => {
+                        console.log(e)
+                        return res(e)
+                    })
+            })
+        })
+
+
+    }
+    static getMails(){
+        return new Promise((res,_rej) => {
+            return config.db().then( db => {
+                db.request()
+                    .query("select * from mail_log")
+                    .then( data => {
+                        return res(data)
+                    })
+                    .catch( e => {
+                        console.log(e)
+                        return res(e)
+                    })
+            })
+        })
+
     }
 }
 
