@@ -43,7 +43,7 @@ create table PNC(
     reason TEXT,
     evidence varchar(250),
     timestamp varchar(250),
-    status BIT
+    status int
 )
 
 create table section(

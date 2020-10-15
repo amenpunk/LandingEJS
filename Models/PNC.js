@@ -70,7 +70,7 @@ class PNC {
             return config.db().then( db => {
                 db.request()
                     .input('id', sql.TYPES.Int, id)
-                    .input('status', sql.TYPES.Bit, estado)
+                    .input('status', sql.TYPES.Int, estado)
                     .query('update PNC set status=@status where id=@id')
                     .then( data => {
                         return res(data)

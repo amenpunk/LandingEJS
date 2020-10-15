@@ -347,6 +347,34 @@ app.post('/mailPDF', async function(req, res){
 })
 
 
+app.post('/pncPDF', async function(req, res){ 
+    
+    const { estado } = req.body;
+    let query = await PNC.getAll()
+    let PNCS = query.recordset;
+    
+    PNCS = PNCS.filter( m => m.status == estado )
+    console.log("PNCS")
+    
+    ejs.renderFile('./views/pncPDF.ejs', { Titulo : "Reporte PNC",  PNCS }, {}, async function(err, html)  {
+        if(err) console.log(err)
+
+        let create = await config.toPDF(html);
+        const buffer = new Buffer(create)
+        const readable = new Readable()
+        readable._read = (e) => { console.log(e) } 
+        readable.push(buffer)
+        readable.push(null)
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=report.pdf');
+        readable.pipe(res)
+    })   
+})
+
+
+
+
 
 app.get('/reportes', async function(req, res){
     sess = req.session;
@@ -614,17 +642,21 @@ app.get("/updatePNC/:id/:status", async (req,res) => {
     const id = req.params.id
     const estado = parseInt(req.params.status) 
 
+    //abiertos, cerrados, en procesos o cancelados
     switch(estado){
         case 0 : {
-            await PNC.delete(id)
+            // cerrado
+            await PNC.update(id, 0)
             break;
         }
         case 1 : {
+            // abierto
             await PNC.update(id, 1)
             break;
         }
         case 2 : {
-            await PNC.update(id, 0)
+            // en proceso
+            await PNC.update(id, 2)
             break;
         }
     }

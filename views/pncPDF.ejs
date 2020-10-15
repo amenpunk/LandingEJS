@@ -1,0 +1,32 @@
+<%- include('pdfHeader'); -%>
+    <h1 class="h1"><%= Titulo %></h1>
+    </br > </br > 
+    <table class="table table-responsive table-striped" style="border : 1px solid #1e1e1e">
+        <thead class="thead-dark">
+            <tr>
+                <th class="tg-0pky"> <center>Razon</center> </th>
+                <th class="tg-0pky"><center>Evidencia</center></th>
+                <th class="tg-0pky"> <center>Fecha</center> </th>
+                <th class="tg-0pky"> <center>Estado</center> </th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(var i=0; i < PNCS.length; i++) { %>
+                <tr>
+                    <td><%= PNCS[i].reason %></td>
+                    <td><%= PNCS[i].evidence %></td>
+                    <td><%= new Date( PNCS[i].timestamp).toString() %></td>
+                    <td><% if(PNCS[i].status == '0') { %>
+                        <span style="color : red">Cerrada</span>
+                            <% } else if(PNCS[i].status  == '1'){ %>
+                                <span style="color : green">Abierta</span>
+                                    <% } else { %>
+                                        <span style="color : yellow">En proceso</span>
+                                            <% } %>
+                                            <td>
+
+                </tr>
+                <% } %>
+        </tbody>
+    </table>
+<%- include('pdfFooter'); -%>

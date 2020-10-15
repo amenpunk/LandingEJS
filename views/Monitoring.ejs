@@ -31,15 +31,17 @@
                                 <td><%= pnc[i].reason %></td>
                                 <td><%= pnc[i].evidence %></td>
                                 <td><%= pnc[i].timestamp %></td>
-                                <td><% if(pnc[i].status) { %>
-                                    <span style="color : green">COMPLETADA</span>
-                                    <% } else{ %>
-                                    <span style="color : red">No atendida</span>
-                                    <% } %>
+                                <td><% if(pnc[i].status == '0') { %>
+                                    <span style="color : red">Cerrada</span>
+                                    <% } else if(pnc[i].status  == '1'){ %>
+                                    <span style="color : green">Abierta</span>
+                                    <% } else { %>
+                                    <span style="color : yellow">En proceso</span>
+                                        <% } %>
                                 <td>
-                                    <a href="/updatePNC/<%= pnc[i].id %>/2" class="btn btn-primary"><center>No completada</center></a>
-                                    <a href="/updatePNC/<%= pnc[i].id %>/0" class="btn btn-danger"><center>Eliminar</center></a>
-                                    <a href="/updatePNC/<%= pnc[i].id %>/1" class="btn btn-success"><center>Completar</center></a>
+                                    <a href="/updatePNC/<%= pnc[i].id %>/0" class="btn btn-danger"><center>Cerrada</center></a>
+                                    <a href="/updatePNC/<%= pnc[i].id %>/2" class="btn btn-warning"><center>En proceso</center></a>
+                                    <a href="/updatePNC/<%= pnc[i].id %>/1" class="btn btn-success"><center>Abierta</center></a>
                                 </td>
                             </tr>
                             <% } %>
