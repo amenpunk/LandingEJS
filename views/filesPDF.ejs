@@ -1,0 +1,26 @@
+<%- include('pdfHeader'); -%>
+    <h1 class="h1"><%= Titulo %></h1>
+    </br > </br > 
+    <table class="table table-responsive table-striped" style="border : 1px solid #1e1e1e">
+        <thead class="thead-dark">
+            <tr>
+                <th class="tg-0pky"> Evento </th>
+                <th class="tg-0pky"> Fecha</th>
+                <th class="tg-0pky"> ID Usuario</th>
+                <th class="tg-0pky"> Nombre Archivo</th>
+                <th class="tg-0pky"> Tipo Archivo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(var i=0; i < Files.length; i++) { %>
+                <tr>
+                    <td><%= Files[i].event %></td>
+                    <td><%= new Date( Files[i].mark).toString() %></td>
+                    <td><%= Files[i].usuario %></td>
+                    <td><%= Files[i].file_name %></td>
+                    <td><%= Files[i].file_type %></td>
+                </tr>
+                <% } %>
+        </tbody>
+    </table>
+<%- include('pdfFooter'); -%>

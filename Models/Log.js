@@ -3,10 +3,16 @@ const sql = require('mssql')
 const { config } = require("../config")
 
 const today = new Date();
+
+
 const dd = String(today.getDate()).padStart(2, '0');
 const mm = String(today.getMonth() + 1).padStart(2, '0');
 const yyyy = today.getFullYear();
 const dateNow = mm + "/" + dd + "/" + yyyy;
+
+const hour = today.getHours() 
+const minutos = today.getMinutes() 
+const hora = `${hour}:${minutos}`
 
 class Log { 
     constructor(log){
@@ -95,6 +101,56 @@ class Log {
             })
         })
 
+    }
+    static LoginLog(user){
+        return new Promise((res,_rej) => {
+            return config.db().then( db => {
+                db.request()
+                    .input('fecha', sql.TYPES.VarChar, dateNow )
+                    .input('hora', sql.TYPES.VarChar, hora )
+                    .input('usuario', sql.TYPES.Int, user )
+                    .query("insert into login_log(fecha,hora,id) values(@fecha,@hora,@usuario)")
+                    .then( data => {
+                        return res(data)
+                    })
+                    .catch( e => {
+                        console.log(e)
+                        return res(e)
+                    })
+            })
+        })
+
+
+    }
+    static getLogins(){
+        return new Promise((res,_rej) => {
+            return config.db().then( db => {
+                db.request()
+                    .query("select * from login_log l inner join login u on u.id = l.id inner join role r on r.id = u.id")
+                    .then( data => {
+                        return res(data)
+                    })
+                    .catch( e => {
+                        console.log(e)
+                        return res(e)
+                    })
+            })
+        })
+    }
+    static getFileLogs(){
+        return new Promise((res,_rej) => {
+            return config.db().then( db => {
+                db.request()
+                    .query("select * from file_logs")
+                    .then( data => {
+                        return res(data)
+                    })
+                    .catch( e => {
+                        console.log(e)
+                        return res(e)
+                    })
+            })
+        })
     }
 }
 

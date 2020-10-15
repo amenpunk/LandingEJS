@@ -70,6 +70,7 @@ create table mail_log(
     departamento varchar(50),
     motivo varchar(250)
 )
+
  
 create PROCEDURE setRole @access_code varchar(3), @departamento varchar(250)
 as
@@ -81,4 +82,11 @@ insert into role values(@id_user, @access_code, @departamento, @puesto)
 insert into section (access_code, name) values('111', "Informatica")
 insert into section (access_code, name) values('110', "Publicidad")
 insert into section (access_code, name) values('100', "Administracion")
+
+create table login_log(
+    fecha varchar(50),
+    hora varchar(50),
+    id int,
+    CONSTRAINT fk_login_log FOREIGN KEY(id) REFERENCES login(id)
+)
 

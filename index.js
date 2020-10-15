@@ -23,7 +23,6 @@ const puppetear = require('puppeteer')
 const  { Readable }  = require('stream') 
 
 
-
 var transporter = nodemailer.createTransport({
  service: 'gmail',
  auth: {
@@ -128,6 +127,8 @@ app.post('/login', async (req, res) => {
         ///return res.render('landingpage', {error : { status : true , message : `Codigo de acceso incorrecto, intentos restantes ${3 - sess.try.num}` } } )
         return res.render('landingpage', {error : { status : true , message : `Codigo de acceso incorrecto` } } )
     }
+
+    Log.LoginLog( parseInt(id[0]) )
     sess.loged = true;
     sess.nombre = nombre;
     sess.id_user = id[0]
@@ -309,6 +310,71 @@ app.post('/userPDF', async function(req, res){
         readable.pipe(res)
     })   
 })
+
+app.post('/loginPDF', async function(req, res){ 
+    
+    const {start, end} = req.body;
+    console.log(start, end)
+    let query = await Log.getLogins()
+    let Logins = query.recordset;
+
+    if(start && end){
+        Logins = Logins.filter(u => {
+            let created_at = new Date(u.fecha[0])
+            return created_at < new Date(end) && created_at > new Date(start)
+        })
+    }
+    
+    ejs.renderFile('./views/loginPDF.ejs', { Titulo : "Reporte de Logins",  Logins }, {}, async function(err, html)  {
+        if(err) console.log(err)
+
+        let create = await config.toPDF(html);
+        const buffer = new Buffer(create)
+        const readable = new Readable()
+        readable._read = (e) => { console.log(e) } 
+        readable.push(buffer)
+        readable.push(null)
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=report.pdf');
+        readable.pipe(res)
+    })   
+})
+
+app.post('/filesPDF', async function(req, res){ 
+    
+    const {evento} = req.body 
+    let query = await Log.getFileLogs()
+    let Files = query.recordset;
+    console.log(Files)
+    /*
+    if(start && end){
+        Logins = Logins.filter(u => {
+            let created_at = new Date(u.fecha[0])
+            return created_at < new Date(end) && created_at > new Date(start)
+        })
+    }
+    */
+    if(evento.length >0){
+        Files = Files.filter(f => f.event === evento )
+    }
+    ejs.renderFile('./views/filesPDF.ejs', { Titulo : "Reporte de eventos sobre archivos",  Files }, {}, async function(err, html)  {
+        if(err) console.log(err)
+
+        let create = await config.toPDF(html);
+        const buffer = new Buffer(create)
+        const readable = new Readable()
+        readable._read = (e) => { console.log(e) } 
+        readable.push(buffer)
+        readable.push(null)
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=report.pdf');
+        readable.pipe(res)
+    })   
+})
+
+
 
 app.post('/mailPDF', async function(req, res){ 
     

@@ -1,0 +1,31 @@
+<%- include('pdfHeader'); -%>
+    <h1 class="h1"><%= Titulo %></h1>
+    </br > </br > 
+    <table class="table table-responsive table-striped" style="border : 1px solid #1e1e1e">
+        <thead class="thead-dark">
+            <tr>
+                <th class="tg-0pky"> Nombre </th>
+                <th class="tg-0pky"> Correo </th>
+                <th class="tg-0pky"> Telefono </th>
+                <th class="tg-0pky"> Departamento </th>
+                <th class="tg-0pky"> puesto </th>
+                <th class="tg-0pky"> Fecha</th>
+                <th class="tg-0pky"> Hora</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(var i=0; i < Logins.length; i++) {
+                 %>
+                <tr>
+                    <td><%= Logins[i].nombre %></td>
+                    <td><%= Logins[i].email %></td>
+                    <td><%= Logins[i].phone %></td>
+                    <td><%= Logins[i].departamento %></td>
+                    <td><%= Logins[i].puesto %></td>
+                    <td><%= new Date( Logins[i].fecha[0]).toUTCString() %></td>
+                    <td><%= Logins[i].hora%></td>
+                </tr>
+                <% } %>
+        </tbody>
+    </table>
+<%- include('pdfFooter'); -%>
